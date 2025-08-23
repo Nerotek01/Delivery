@@ -1,0 +1,242 @@
+rewards:
+  message:
+    id: message1
+    slot: 12
+    type: MESSAGE
+    permission: "deliveryman.message1"
+    message: |-
+      &7
+      &eMessage with multi
+      &eline.
+      &7
+    noClaimed:
+      material: PAPER
+      data: 0
+      amount: 1
+      message: "&eYou've claimed the reward: <reward>"
+      name: "<status>Message Reward"
+      lore:
+        - "&7Here's your message."
+        - "&7"
+        - "<status>Click to claim!"
+    claimed:
+      material: MINECART
+      data: 0
+      amount: 1
+      message: "&cYou've already claimed this reward."
+      name: "<status>Message Reward"
+      lore:
+        - "&7You've already collected this"
+        - "&7reward, come back later."
+  vote:
+    id: vote1
+    slot: 13
+    type: VOTE
+    countdown: 24
+    timeUnit: HOURS
+    permission: "deliveryman.vote1"
+    voteSite: "MinecraftServers"
+    message: |-
+      &aMinecraftServers:
+      &eVote in this link: &bhttps://minecraftservers.org
+      &7
+    rewards:
+      - "say Hello!"
+    noClaimed:
+      material: MAP
+      data: 0
+      amount: 1
+      message: "&eYou've claimed the reward: <reward>"
+      name: "<status>Vote Reward"
+      lore:
+        - "&7Here's your daily vote reward."
+        - "&7"
+        - "<status>Click to claim!"
+    claimed:
+      material: MINECART
+      data: 0
+      amount: 1
+      message: "&cYou've already claimed this reward."
+      name: "<status>Vote Reward"
+      lore:
+        - "&7You've already collected this"
+        - "&7reward, come back later."
+        - "&7"
+        - "&7Coming Soon Reward: <cooldown>"
+  unique:
+    id: unique1
+    slot: 14
+    type: UNIQUE
+    permission: "deliveryman.unique1"
+    rewards:
+      - "say Hello!"
+    noClaimed:
+      material: DIAMOND
+      data: 0
+      amount: 1
+      message: "&eYou've claimed the reward: <reward>"
+      name: "<status>Unique Reward"
+      lore:
+        - "&7Here's your unique reward."
+        - "&7"
+        - "<status>Click to claim!"
+    claimed:
+      material: MINECART
+      data: 0
+      amount: 1
+      message: "&cYou've already claimed this reward."
+      name: "<status>Unique Reward"
+      lore:
+        - "&7You've already collected this"
+        - "&7reward"
+        - "&7"
+  reward1:
+    id: reward1
+    slot: 20
+    type: NORMAL
+    countdown: 24
+    timeUnit: HOURS
+    permission: "deliveryman.normal"
+    rewards:
+      - "say Hello!"
+    noClaimed:
+      material: ENDER_CHEST
+      data: 0
+      amount: 1
+      message: "&eYou've claimed the reward: <reward>"
+      name: "<status>EnderChest Reward &e#1"
+      lore:
+        - "&7Here's your daily box reward."
+        - "&7"
+        - "<status>Click to claim!"
+    claimed:
+      material: MINECART
+      data: 0
+      amount: 1
+      message: "&cYou've already claimed this reward."
+      name: "<status>EnderChest Reward &e#1"
+      lore:
+        - "&7You've already collected this"
+        - "&7reward, come back later."
+        - "&7"
+        - "&7Coming Soon Reward: <cooldown>"
+  reward2:
+    id: reward2
+    slot: 21
+    type: NORMAL
+    countdown: 24
+    timeUnit: HOURS
+    permission: "deliveryman.vip"
+    rewards:
+      - "say Hello!"
+    noClaimed:
+      material: ENDER_CHEST
+      data: 0
+      amount: 1
+      message: "&eYou've claimed the reward: <reward>"
+      name: "<status>EnderChest Reward &e#2"
+      lore:
+        - "&7Here's your daily box reward."
+        - "&7"
+        - "<status>Click to claim!"
+    claimed:
+      material: MINECART
+      data: 0
+      amount: 1
+      message: "&cYou've already claimed this reward."
+      name: "<status>EnderChest Reward &e#2"
+      lore:
+        - "&7You've already collected this"
+        - "&7reward, come back later."
+        - "&7"
+        - "&7Coming Soon Reward: <cooldown>"
+  reward3:
+    id: reward3
+    slot: 22
+    type: NORMAL
+    countdown: 24
+    timeUnit: HOURS
+    permission: "deliveryman.vip+"
+    rewards:
+      - "say Hello!"
+    noClaimed:
+      material: ENDER_CHEST
+      data: 0
+      amount: 1
+      message: "&eYou've claimed the reward: <reward>"
+      name: "<status>EnderChest Reward &e#3"
+      lore:
+        - "&7Here's your daily box reward."
+        - "&7"
+        - "<status>Click to claim!"
+    claimed:
+      material: MINECART
+      data: 0
+      amount: 1
+      message: "&cYou've already claimed this reward."
+      name: "<status>EnderChest Reward &e#3"
+      lore:
+        - "&7You've already collected this"
+        - "&7reward, come back later."
+        - "&7"
+        - "&7Coming Soon Reward: <cooldown>"
+  reward4:
+    id: reward4
+    slot: 23
+    type: NORMAL
+    countdown: 24
+    timeUnit: HOURS
+    permission: "deliveryman.mvip"
+    rewards:
+      - "say Hello!"
+    noClaimed:
+      material: ENDER_CHEST
+      data: 0
+      amount: 1
+      message: "&eYou've claimed the reward: <reward>"
+      name: "<status>EnderChest Reward &e#4"
+      lore:
+        - "&7Here's your daily box reward."
+        - "&7"
+        - "<status>Click to claim!"
+    claimed:
+      material: MINECART
+      data: 0
+      amount: 1
+      message: "&cYou've already claimed this reward."
+      name: "<status>EnderChest Reward &e#4"
+      lore:
+        - "&7You've already collected this"
+        - "&7reward, come back later."
+        - "&7"
+        - "&7Coming Soon Reward: <cooldown>"
+  reward5:
+    id: reward5
+    slot: 24
+    type: NORMAL
+    countdown: 24
+    timeUnit: HOURS
+    permission: "deliveryman.mvip+"
+    rewards:
+      - "say Hello!"
+    noClaimed:
+      material: ENDER_CHEST
+      data: 0
+      amount: 1
+      message: "&eYou've claimed the reward: <reward>"
+      name: "<status>EnderChest Reward &e#5"
+      lore:
+        - "&7Here's your daily box reward."
+        - "&7"
+        - "<status>Click to claim!"
+    claimed:
+      material: MINECART
+      data: 0
+      amount: 1
+      message: "&cYou've already claimed this reward."
+      name: "<status>EnderChest Reward &e#5"
+      lore:
+        - "&7You've already collected this"
+        - "&7reward, come back later."
+        - "&7"
+        - "&7Coming Soon Reward: <cooldown>"

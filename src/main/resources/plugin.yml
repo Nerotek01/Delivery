@@ -1,0 +1,16 @@
+name: DeliveryMan
+main: com.nerotek01.deliveryman.Main
+version: 1.8.0
+author: Leonardo0013YT
+softdepend:
+  - CMI
+  - HolographicDisplays
+  - Holograms
+  - TrHologram
+  - Votifier
+  - ServerNPC
+  - PlaceholderAPI
+  - MVdWPlaceholderAPI
+commands:
+  deliveryman:
+    aliases: [ udm ]
