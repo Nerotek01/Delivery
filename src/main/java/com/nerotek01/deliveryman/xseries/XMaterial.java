@@ -4,10 +4,12 @@
 /*      */ import com.google.common.cache.CacheBuilder;
 /*      */ import com.google.common.collect.ImmutableMap;
 /*      */ import com.google.common.collect.ImmutableSet;
+/*      */ import com.google.common.collect.Maps;
 /*      */ import com.google.common.collect.UnmodifiableIterator;
 /*      */ import java.util.ArrayList;
 /*      */ import java.util.EnumSet;
 /*      */ import java.util.List;
+/*      */ import java.util.Locale;
 /*      */ import java.util.Map;
 /*      */ import java.util.Objects;
 /*      */ import java.util.Optional;
@@ -16,6 +18,9 @@
 /*      */ import javax.annotation.Nonnull;
 /*      */ import javax.annotation.Nullable;
 /*      */ import org.apache.commons.lang.Validate;
+/*      */ import org.apache.commons.lang.StringUtils;
+/*      */ import org.apache.commons.lang.WordUtils;
+/*      */ import org.bukkit.Bukkit;
 /*      */ import org.bukkit.Material;
 /*      */ import org.bukkit.inventory.ItemStack;
 /*      */ 
@@ -1089,7 +1094,11 @@
 /*      */   static {
 /* 1090 */     VALUES = EnumSet.allOf(XMaterial.class);
 /*      */     
-/* 1092 */     DAMAGEABLE = ImmutableSet.of("HELMET", "CHESTPLATE", "LEGGINGS", "BOOTS", "SWORD", "AXE", (Object[])new String[] { "PICKAXE", "SHOVEL", "HOE", "ELYTRA", "TRIDENT", "HORSE_ARMOR", "BARDING", "SHEARS", "FLINT_AND_STEEL", "BOW", "FISHING_ROD", "CARROT_ON_A_STICK", "CARROT_STICK", "SPADE", "SHIELD" });
+/* 1092 */     DAMAGEABLE = ImmutableSet.<String>builder()
+/*      */         .add("HELMET", "CHESTPLATE", "LEGGINGS", "BOOTS", "SWORD", "AXE")
+/*      */         .add("PICKAXE", "SHOVEL", "HOE", "ELYTRA", "TRIDENT", "HORSE_ARMOR", "BARDING")
+/*      */         .add("SHEARS", "FLINT_AND_STEEL", "BOW", "FISHING_ROD", "CARROT_ON_A_STICK", "CARROT_STICK", "SPADE", "SHIELD")
+/*      */         .build();
 /*      */ 
 /*      */ 
 /*      */ 
@@ -1167,9 +1176,19 @@
 /*      */   private static final boolean ISFLAT;
 /*      */   
 /*      */   private final byte data;
-/*      */   
+/*      */
 /*      */   private final String[] legacy;
-/*      */   
+/*      */
+/*      */   XMaterial() {
+/*      */     this.data = 0;
+/*      */     this.legacy = new String[0];
+/*      */   }
+/*      */
+/*      */   XMaterial(String... legacy) {
+/*      */     this.data = 0;
+/*      */     this.legacy = legacy;
+/*      */   }
+/*      */
 /*      */   XMaterial(int data, String... legacy) {
 /* 1174 */     this.data = (byte)data;
 /* 1175 */     this.legacy = legacy;
@@ -1329,7 +1348,7 @@
 /*      */   public static XMaterial matchXMaterial(@Nonnull Material material) {
 /* 1330 */     Objects.requireNonNull(material, "Cannot match null material");
 /* 1331 */     return matchDefinedXMaterial(material.name(), (byte)-1)
-/* 1332 */       .<Throwable>orElseThrow(() -> new IllegalArgumentException("Unsupported Material With No Bytes: " + material.name()));
+/* 1332 */       .orElseThrow(() -> new IllegalArgumentException("Unsupported Material With No Bytes: " + material.name()));
 /*      */   }
 /*      */ 
 /*      */ 
@@ -1349,7 +1368,7 @@
 /* 1349 */     byte data = (byte)((ISFLAT || isDamageable(material)) ? 0 : item.getDurability());
 /*      */     
 /* 1351 */     return matchDefinedXMaterial(material, data)
-/* 1352 */       .<Throwable>orElseThrow(() -> new IllegalArgumentException("Unsupported Material: " + material + " (" + data + ')'));
+/* 1352 */       .orElseThrow(() -> new IllegalArgumentException("Unsupported Material: " + material + " (" + data + ')'));
 /*      */   }
 /*      */ 
 /*      */ 

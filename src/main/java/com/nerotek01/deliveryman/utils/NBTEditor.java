@@ -32,6 +32,7 @@
 /*      */   private static final Map<Class<?>, Field> NBTTagFieldCache;
 /*   33 */   private static final String VERSION = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
 /*   34 */   private static final MinecraftVersion LOCAL_VERSION = MinecraftVersion.get(VERSION); private static Field NBTListData;
+/*      */   private static Field NBTCompoundMap;
 /*      */   static {
 /*   36 */     classCache = new HashMap<>();
 /*      */     try {
@@ -222,7 +223,6 @@
 /*  222 */       e.printStackTrace();
 /*      */     } 
 /*      */   }
-/*      */   private static Field NBTCompoundMap;
 /*      */   private static Class<?> getNBTTag(Class<?> primitiveType) {
 /*  227 */     if (NBTClasses.containsKey(primitiveType))
 /*  228 */       return NBTClasses.get(primitiveType); 

@@ -1,7 +1,6 @@
 /*      */ package com.nerotek01.deliveryman.xseries;
-/*      */ 
+/*      */
 /*      */ import com.google.common.base.Enums;
-/*      */ import com.google.common.base.Optional;
 /*      */ import com.google.common.base.Strings;
 /*      */ import com.google.common.cache.Cache;
 /*      */ import com.google.common.cache.CacheBuilder;
@@ -1031,7 +1030,7 @@
 /* 1031 */   WEATHER_RAIN_ABOVE(new String[0]);
 /*      */   
 /*      */   public static final EnumSet<XSound> VALUES;
-/*      */   private static final Cache<XSound, Optional<Sound>> CACHE;
+/*      */   private static final Cache<XSound, Sound> CACHE;
 /*      */   private static final Pattern FORMAT_PATTERN;
 /*      */   private static final Pattern DOUBLE_SPACE;
 /*      */   private final String[] legacy;
@@ -1123,7 +1122,7 @@
 /*      */   public static XSound matchXSound(@Nonnull Sound sound) {
 /* 1124 */     Objects.requireNonNull(sound, "Cannot match XSound of a null sound");
 /* 1125 */     return matchXSound(sound.name())
-/* 1126 */       .<Throwable>orElseThrow(() -> new IllegalArgumentException("Unsupported Sound: " + sound.name()));
+/* 1126 */       .orElseThrow(() -> new IllegalArgumentException("Unsupported Sound: " + sound.name()));
 /*      */   }
 /*      */ 
 /*      */ 
@@ -1255,24 +1254,25 @@
 /*      */   
 /*      */   @Nullable
 /*      */   public Sound parseSound() {
-/* 1258 */     Optional<Sound> cachedSound = (Optional<Sound>)CACHE.getIfPresent(this);
-/* 1259 */     if (cachedSound != null) return (Sound)cachedSound.orNull();
-/*      */ 
-/*      */ 
-/*      */ 
-/*      */     
-/* 1264 */     Optional<Sound> sound = Enums.getIfPresent(Sound.class, name());
-/*      */     
-/* 1266 */     if (!sound.isPresent()) {
-/* 1267 */       for (String legacy : this.legacy) {
-/* 1268 */         sound = Enums.getIfPresent(Sound.class, legacy);
-/* 1269 */         if (sound.isPresent()) {
-/*      */           break;
-/*      */         }
-/*      */       } 
+/*      */     Sound cachedSound = (Sound) CACHE.getIfPresent(this);
+/*      */     if (cachedSound != null) return cachedSound;
+/*      */
+/*      */     Sound sound = null;
+/*      */     try {
+/*      */       sound = Sound.valueOf(name());
+/*      */     } catch (IllegalArgumentException ignored) {
 /*      */     }
-/* 1274 */     CACHE.put(this, sound);
-/* 1275 */     return (Sound)sound.orNull();
+/*      */     if (sound == null) {
+/*      */       for (String legacy : this.legacy) {
+/*      */         try {
+/*      */           sound = Sound.valueOf(legacy);
+/*      */           if (sound != null) break;
+/*      */         } catch (IllegalArgumentException ignored) {
+/*      */         }
+/*      */       }
+/*      */     }
+/*      */     if (sound != null) CACHE.put(this, sound);
+/*      */     return sound;
 /*      */   }
 /*      */ 
 /*      */ 
