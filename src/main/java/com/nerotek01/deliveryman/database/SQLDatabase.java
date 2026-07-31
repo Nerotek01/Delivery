@@ -1,12 +1,19 @@
 package com.nerotek01.deliveryman.database;
 
 import com.nerotek01.deliveryman.Main;
+import com.nerotek01.deliveryman.api.DeliveryPlayerLoadEvent;
 import com.nerotek01.deliveryman.data.PlayerData;
+import com.nerotek01.deliveryman.interfaces.Database;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+
 import java.io.File;
-import java.sql.*;
-import java.util.UUID;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.logging.Level;
 
 public class SQLDatabase implements Database {
@@ -23,16 +30,16 @@ public class SQLDatabase implements Database {
     private void connect() {
         try {
             File dataFile = new File(dbFile);
+            File parent = dataFile.getParentFile();
+            if (parent != null && !parent.exists()) parent.mkdirs();
             if (!dataFile.exists() && !dataFile.createNewFile()) {
                 throw new RuntimeException("Failed to create database file");
             }
-
             Class.forName("org.sqlite.JDBC");
             this.connection = DriverManager.getConnection("jdbc:sqlite:" + dbFile);
-            plugin.getLogger().info("SQLite connected successfully");
             createTable();
         } catch (Exception e) {
-            plugin.getLogger().log(Level.SEVERE, "Database connection failed", e);
+            plugin.getPluginLogger().severe("SQLite connection failed", e);
             Bukkit.getPluginManager().disablePlugin(plugin);
         }
     }
@@ -43,77 +50,109 @@ public class SQLDatabase implements Database {
     }
 
     @Override
-    public void loadPlayer(Player p) {
+    public void loadPlayer(final Player p) {
         Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
-            UUID uuid = p.getUniqueId();
             String selectSQL = "SELECT Data FROM DeliveryMan WHERE UUID = ?";
-
             try (Connection con = getConnection();
                  PreparedStatement stmt = con.prepareStatement(selectSQL)) {
-
-                stmt.setString(1, uuid.toString());
+                stmt.setString(1, p.getUniqueId().toString());
                 ResultSet rs = stmt.executeQuery();
-
+                PlayerData pd;
                 if (rs.next()) {
-                    PlayerData pd = plugin.getGson().fromJson(rs.getString("Data"), PlayerData.class);
+                    pd = plugin.getGson().fromJson(rs.getString("Data"), PlayerData.class);
+                    if (pd == null) {
+                        pd = new PlayerData(p.getUniqueId());
+                    }
                     plugin.getDm().addPlayer(p, pd);
                 } else {
-                    createNewPlayer(p);
+                    pd = new PlayerData(p.getUniqueId());
+                    createNewPlayer(p, pd);
+                }
+                final PlayerData loaded = pd;
+                if (plugin.getDb() instanceof CachedDatabase) {
+                    ((CachedDatabase) plugin.getDb()).onBackendLoaded(p, loaded);
+                } else {
+                    Bukkit.getScheduler().runTask(plugin, () ->
+                            Bukkit.getPluginManager().callEvent(new DeliveryPlayerLoadEvent(p)));
                 }
             } catch (SQLException e) {
-                plugin.getLogger().log(Level.WARNING, "Failed to load player data", e);
+                plugin.getPluginLogger().warning("Failed to load player data for " + p.getName(), e);
             }
         }, 10L);
     }
 
-    private void createNewPlayer(Player p) throws SQLException {
+    private void createNewPlayer(Player p, PlayerData pd) throws SQLException {
         String insertSQL = "INSERT INTO DeliveryMan(UUID, Name, Data) VALUES(?,?,?)";
-        PlayerData pd = new PlayerData(p.getUniqueId());
         String jsonData = plugin.getGson().toJson(pd);
-
         try (Connection con = getConnection();
              PreparedStatement stmt = con.prepareStatement(insertSQL)) {
-
             stmt.setString(1, p.getUniqueId().toString());
             stmt.setString(2, p.getName());
             stmt.setString(3, jsonData);
             stmt.executeUpdate();
-
             plugin.getDm().addPlayer(p, pd);
         }
     }
 
     @Override
     public void savePlayer(Player p) {
-        PlayerData pd = plugin.getDm().getPlayerData(p);
+        final PlayerData pd = plugin.getDm().getPlayerData(p);
         if (pd == null) return;
-
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            String updateSQL = "UPDATE DeliveryMan SET Data = ? WHERE UUID = ?";
+            String updateSQL = "UPDATE DeliveryMan SET Data = ?, Name = ? WHERE UUID = ?";
             String jsonData = plugin.getGson().toJson(pd);
-
             try (Connection con = getConnection();
                  PreparedStatement stmt = con.prepareStatement(updateSQL)) {
-
                 stmt.setString(1, jsonData);
-                stmt.setString(2, p.getUniqueId().toString());
+                stmt.setString(2, p.getName());
+                stmt.setString(3, p.getUniqueId().toString());
                 stmt.executeUpdate();
             } catch (SQLException e) {
-                plugin.getLogger().log(Level.WARNING, "Failed to save player data", e);
+                plugin.getPluginLogger().warning("Failed to save player data for " + p.getName(), e);
             } finally {
                 plugin.getDm().removePlayer(p);
             }
         });
     }
 
-    // Other methods remain similar but use try-with-resources
+    @Override
+    public void savePlayerSync(Player p) {
+        PlayerData pd = plugin.getDm().getPlayerData(p);
+        if (pd == null) return;
+        String updateSQL = "UPDATE DeliveryMan SET Data = ?, Name = ? WHERE UUID = ?";
+        String jsonData = plugin.getGson().toJson(pd);
+        try (Connection con = getConnection();
+             PreparedStatement stmt = con.prepareStatement(updateSQL)) {
+            stmt.setString(1, jsonData);
+            stmt.setString(2, p.getName());
+            stmt.setString(3, p.getUniqueId().toString());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            plugin.getPluginLogger().warning("Failed to save player data (sync) for " + p.getName(), e);
+        } finally {
+            plugin.getDm().removePlayer(p);
+        }
+    }
+
     private void executeUpdate(String sql) {
         try (Connection con = getConnection();
              Statement stmt = con.createStatement()) {
             stmt.executeUpdate(sql);
         } catch (SQLException e) {
-            plugin.getLogger().log(Level.WARNING, "Failed to execute update", e);
+            plugin.getPluginLogger().warning("Failed to execute update: " + sql, e);
         }
+    }
+
+    private Connection getConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            try {
+                Class.forName("org.sqlite.JDBC");
+                connection = DriverManager.getConnection("jdbc:sqlite:" + dbFile);
+            } catch (ClassNotFoundException ex) {
+                throw new SQLException("SQLite driver not available", ex);
+            }
+        }
+        return connection;
     }
 
     @Override
@@ -123,7 +162,12 @@ public class SQLDatabase implements Database {
                 connection.close();
             }
         } catch (SQLException e) {
-            plugin.getLogger().log(Level.WARNING, "Failed to close connection", e);
+            plugin.getPluginLogger().warning("Failed to close SQLite connection", e);
         }
+    }
+
+    @Override
+    public String backendName() {
+        return "SQLite";
     }
 }
