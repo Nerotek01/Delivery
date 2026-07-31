@@ -63,7 +63,7 @@ public class Reward {
         this.noClaimed = new RewardStatus(plugin, path + ".noClaimed");
         this.claimed = new RewardStatus(plugin, path + ".claimed");
         this.rewards = Collections.unmodifiableList(plugin.getRewards()
-                .getListOrDefault(path + ".rewards", Collections.emptyList()));
+                .getListOrDefaultStrings(path + ".rewards", Collections.emptyList()));
     }
 
     public String getId() { return id; }
@@ -86,9 +86,9 @@ public class Reward {
     public ItemStack getIcon(Player p, boolean claimed, String countdownStr) {
         if (claimed) {
             return (ItemStack) NBTEditor.set(
-                    this.claimed.getIcon("§c", countdownStr), this.id, "ULTRADM", "ID");
+                    this.claimed.getIcon("\u00a7c", countdownStr), this.id, "ULTRADM", "ID");
         }
-        String color = p.hasPermission(this.permission) ? "§e" : "§c";
+        String color = p.hasPermission(this.permission) ? "\u00a7e" : "\u00a7c";
         return (ItemStack) NBTEditor.set(
                 this.noClaimed.getIcon(color, ""), this.id, "ULTRADM", "ID");
     }

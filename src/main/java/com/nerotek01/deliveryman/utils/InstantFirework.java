@@ -15,7 +15,8 @@ public class InstantFirework {
         Firework firework = loc.getWorld().spawn(loc, Firework.class);
         FireworkMeta meta = firework.getFireworkMeta();
 
-        FireworkEffect.Type type = FireworkEffect.Type.values()[random(0, FireworkEffect.Type.values().length)];
+        FireworkEffect.Type[] types = FireworkEffect.Type.values();
+        FireworkEffect.Type type = types[random(0, types.length)];
         FireworkEffect effect = FireworkEffect.builder()
                 .with(type)
                 .withColor(randomColor())
@@ -30,8 +31,7 @@ public class InstantFirework {
             Field field = handle.getClass().getDeclaredField("expectedLifespan");
             field.setAccessible(true);
             field.set(handle, 1);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
     }
 

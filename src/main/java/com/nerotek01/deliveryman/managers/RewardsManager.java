@@ -5,7 +5,9 @@ import com.nerotek01.deliveryman.data.PlayerData;
 import com.nerotek01.deliveryman.enums.RewardType;
 import com.nerotek01.deliveryman.rewards.Reward;
 import org.bukkit.entity.Player;
-import java.util.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class RewardsManager {
     private final Main plugin;
@@ -21,15 +23,16 @@ public class RewardsManager {
         rewards.clear();
         votes.clear();
 
-        if (plugin.getRewards().isSet("rewards")) {
-            plugin.getRewards().getConfig().getConfigurationSection("rewards").getKeys(false).forEach(r -> {
-                Reward reward = new Reward(plugin, "rewards." + r);
-                rewards.put(reward.getId(), reward);
-                if (reward.getType() == RewardType.VOTE) {
-                    votes.put(reward.getVoteSite(), reward.getId());
-                }
-            });
-        }
+        var section = plugin.getRewards().getConfig().getConfigurationSection("rewards");
+        if (section == null) return;
+
+        section.getKeys(false).forEach(r -> {
+            Reward reward = new Reward(plugin, "rewards." + r);
+            rewards.put(reward.getId(), reward);
+            if (reward.getType() == RewardType.VOTE) {
+                votes.put(reward.getVoteSite(), reward.getId());
+            }
+        });
     }
 
     public int getAvailableRewards(Player p, PlayerData pd) {

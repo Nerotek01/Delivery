@@ -20,7 +20,10 @@ public class VotifierListener implements Listener {
     @EventHandler
     public void onVote(VotifierEvent e) {
         Vote vote = e.getVote();
-        Player p = Bukkit.getPlayer(vote.getUsername());
+        String username = vote.getUsername();
+        if (username == null || username.isEmpty()) return;
+
+        Player p = Bukkit.getPlayer(username);
         if (p == null) return;
 
         String serviceName = vote.getServiceName();
@@ -29,22 +32,33 @@ public class VotifierListener implements Listener {
 
         if (plugin.getDm().isVoting(p.getName(), serviceName)) {
             Reward reward = plugin.getRm().getRewards().get(rewardId);
+            if (reward == null) return;
             PlayerData pd = plugin.getDm().getPlayerData(p);
 
-            p.sendMessage(reward.getNoClaimed().getMessage()
-                    .replace("<reward>", reward.getNoClaimed().getName())
-                    .replace("<status>", "§e"));
+            String message = reward.getNoClaimed().getMessage();
+            if (message != null) {
+                String formatted = message
+                        .replace("<reward>", reward.getNoClaimed().getName())
+                        .replace("<status>", "\u00a7e");
+                for (String line : formatted.split("\\n")) {
+                    p.sendMessage(line.replace("&", "\u00a7"));
+                }
+            }
 
-            pd.getClaimed().put(reward.getId(), System.currentTimeMillis());
+            pd.claim(reward.getId(), System.currentTimeMillis());
             executeCommands(p, reward.getRewards());
             plugin.getDm().removeVoting(p.getName(), serviceName);
+            plugin.getPluginLogger().info("Vote reward '" + rewardId + "' granted to " + p.getName()
+                    + " from service " + serviceName);
         }
     }
 
     private void executeCommands(Player p, Iterable<String> commands) {
+        if (commands == null) return;
         String playerName = p.getName();
-        commands.forEach(cmd ->
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd.replace("<player>", playerName))
-        );
+        for (String cmd : commands) {
+            if (cmd == null || cmd.isEmpty()) continue;
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd.replace("<player>", playerName));
+        }
     }
 }

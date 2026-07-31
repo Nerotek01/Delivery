@@ -1,6 +1,7 @@
 package com.nerotek01.deliveryman.rewards;
 
 import com.nerotek01.deliveryman.Main;
+import com.nerotek01.deliveryman.utils.ItemUtils;
 import com.nerotek01.deliveryman.xseries.XMaterial;
 import com.nerotek01.deliveryman.xseries.XSound;
 import org.bukkit.Material;
@@ -40,7 +41,7 @@ public class RewardStatus {
 
         List<String> tempLore = new ArrayList<>();
         for (String s : plugin.getRewards().getList(path + ".lore")) {
-            tempLore.add(s.replace("&", "§"));
+            tempLore.add(s.replace("&", "\u00a7"));
         }
         this.lore = Collections.unmodifiableList(tempLore);
     }

@@ -1,13 +1,21 @@
 package com.nerotek01.deliveryman.cmds;
 
 import com.nerotek01.deliveryman.Main;
-import com.nerotek01.deliveryman.utils.Utils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
-public class DeliveryManCMD implements CommandExecutor {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+public class DeliveryManCMD implements CommandExecutor, TabCompleter {
+
+    private static final List<String> SUBCOMMANDS = Arrays.asList("menu", "reload");
+
     private final Main plugin;
 
     public DeliveryManCMD(Main plugin) {
@@ -16,114 +24,72 @@ public class DeliveryManCMD implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("This command can only be used by players.");
-            return true;
-        }
-
-        Player player = (Player) sender;
-
         if (args.length == 0) {
-            sendHelp(player);
+            sendHelp(sender);
             return true;
         }
 
         switch (args[0].toLowerCase()) {
             case "menu":
-                plugin.getRem().createRewardMenu(player);
-                return true;
-
-            case "add":
-                return handleAddCommand(player, args);
-
-            case "remove":
-                return handleRemoveCommand(player, args);
-
+                return handleMenu(sender);
             case "reload":
-                return handleReloadCommand(player);
-
+                return handleReload(sender);
             default:
-                sendHelp(player);
+                sendHelp(sender);
                 return true;
         }
     }
 
-    private boolean handleAddCommand(Player player, String[] args) {
-        if (!player.hasPermission("deliveryman.admin")) {
+    private boolean handleMenu(CommandSender sender) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage("\u00a7cThis command can only be used by players.");
+            return true;
+        }
+        Player player = (Player) sender;
+        if (!player.hasPermission("deliveryman.menu")) {
             player.sendMessage(plugin.getLang().get("setup.noPermission"));
             return true;
         }
-
-        if (args.length < 2) {
-            sendHelp(player);
-            return true;
-        }
-
-        String key = args[1];
-        String configPath = "npcs." + key;
-
-        if (plugin.getConfig().isSet(configPath)) {
-            player.sendMessage(plugin.getLang().get("setup.alreadyNPC"));
-            return true;
-        }
-
-        plugin.getConfig().set(configPath, Utils.getLocationString(player.getLocation()));
-        plugin.saveConfig();
-        plugin.getNpc().reload();
-
-        player.sendMessage(plugin.getLang().get("setup.addNPC")
-                .replace("<key>", key)
-                .replace("<loc>", Utils.getFormatedLocation(player.getLocation())));
+        plugin.getRem().createRewardMenu(player);
         return true;
     }
 
-    private boolean handleRemoveCommand(Player player, String[] args) {
-        if (!player.hasPermission("deliveryman.admin")) {
-            player.sendMessage(plugin.getLang().get("setup.noPermission"));
+    private boolean handleReload(CommandSender sender) {
+        if (!sender.hasPermission("deliveryman.admin")) {
+            sender.sendMessage(plugin.getLang().get("setup.noPermission"));
             return true;
         }
-
-        if (args.length < 2) {
-            sendHelp(player);
-            return true;
-        }
-
-        String key = args[1];
-        String configPath = "npcs." + key;
-
-        if (!plugin.getConfig().isSet(configPath)) {
-            player.sendMessage(plugin.getLang().get("setup.alreadyNPC"));
-            return true;
-        }
-
-        plugin.getConfig().set(configPath, null);
-        plugin.saveConfig();
-        plugin.getNpc().reload();
-
-        player.sendMessage(plugin.getLang().get("setup.removeNPC")
-                .replace("<key>", key));
-        return true;
-    }
-
-    private boolean handleReloadCommand(Player player) {
-        if (!player.hasPermission("deliveryman.admin")) {
-            player.sendMessage(plugin.getLang().get("setup.noPermission"));
-            return true;
-        }
-
         plugin.reload();
-        player.sendMessage(plugin.getLang().get("setup.reload"));
+        sender.sendMessage(plugin.getLang().get("setup.reload"));
         return true;
     }
 
     private void sendHelp(CommandSender sender) {
-        sender.sendMessage("§7§m--------------------------------");
-        sender.sendMessage("§e/udm menu §a- §bOpen delivery menu");
-        if (sender.hasPermission("deliveryman.admin")) {
-            sender.sendMessage("§e/udm add <key> §a- §bAdd NPC");
-            sender.sendMessage("§e/udm remove <key> §a- §bRemove NPC");
-            sender.sendMessage("§e/udm reload §a- §bReload config");
+        sender.sendMessage("\u00a78\u00a7m--------------------------------");
+        sender.sendMessage("\u00a7eDeliveryMan \u00a77- Commands");
+        sender.sendMessage("\u00a78\u00a7m--------------------------------");
+        if (sender.hasPermission("deliveryman.menu")) {
+            sender.sendMessage("\u00a7e/udm menu \u00a77- \u00a7fOpen the rewards menu");
         }
-        sender.sendMessage("§7§m--------------------------------");
+        if (sender.hasPermission("deliveryman.admin")) {
+            sender.sendMessage("\u00a7e/udm reload \u00a77- \u00a7fReload configuration");
+        }
+        sender.sendMessage("\u00a78\u00a7m--------------------------------");
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
+        if (args.length == 1) {
+            String prefix = args[0].toLowerCase();
+            List<String> result = new ArrayList<>();
+            for (String sub : SUBCOMMANDS) {
+                if (!sub.startsWith(prefix)) continue;
+                if ("menu".equals(sub) && !sender.hasPermission("deliveryman.menu")) continue;
+                if ("reload".equals(sub) && !sender.hasPermission("deliveryman.admin")) continue;
+                result.add(sub);
+            }
+            return result;
+        }
+        return Collections.emptyList();
     }
 }

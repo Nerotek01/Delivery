@@ -1,6 +1,8 @@
 package com.nerotek01.deliveryman.data;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerData {
@@ -8,13 +10,16 @@ public class PlayerData {
     private final Map<String, Long> claimed;
     private final Map<String, Integer> streaks;
 
+    public PlayerData() {
+        this(null);
+    }
+
     public PlayerData(UUID uuid) {
         this.uuid = uuid;
         this.claimed = new ConcurrentHashMap<>();
         this.streaks = new ConcurrentHashMap<>();
     }
 
-    // Getters
     public UUID getUuid() {
         return uuid;
     }
@@ -27,7 +32,6 @@ public class PlayerData {
         return Collections.unmodifiableMap(claimed);
     }
 
-    // Setters with thread-safe operations
     public void setStreak(String key, int value) {
         streaks.put(key, value);
     }
@@ -36,18 +40,24 @@ public class PlayerData {
         claimed.put(key, value);
     }
 
-    // Bulk operations
+    public void claim(String key, long timestamp) {
+        claimed.put(key, timestamp);
+    }
+
+    public void resetClaim(String key) {
+        claimed.remove(key);
+    }
+
     public void setAllStreaks(Map<String, Integer> newStreaks) {
         streaks.clear();
-        streaks.putAll(newStreaks);
+        if (newStreaks != null) streaks.putAll(newStreaks);
     }
 
     public void setAllClaims(Map<String, Long> newClaims) {
         claimed.clear();
-        claimed.putAll(newClaims);
+        if (newClaims != null) claimed.putAll(newClaims);
     }
 
-    // Utility methods
     public boolean hasClaimed(String key) {
         return claimed.containsKey(key);
     }

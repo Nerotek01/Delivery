@@ -1,21 +1,26 @@
 package com.nerotek01.deliveryman;
 
 import com.google.gson.Gson;
+import com.nerotek01.deliveryman.cache.RedisCache;
+import com.nerotek01.deliveryman.cmds.DeliveryManCMD;
 import com.nerotek01.deliveryman.config.Settings;
-import com.nerotek01.deliveryman.controllers.VersionController;
+import com.nerotek01.deliveryman.database.CachedDatabase;
+import com.nerotek01.deliveryman.database.MongoDBDatabase;
 import com.nerotek01.deliveryman.database.MySQLDatabase;
+import com.nerotek01.deliveryman.database.SQLDatabase;
 import com.nerotek01.deliveryman.enums.DBType;
 import com.nerotek01.deliveryman.interfaces.Database;
 import com.nerotek01.deliveryman.listeners.MenuListener;
 import com.nerotek01.deliveryman.listeners.PlayerListener;
-import com.nerotek01.deliveryman.managers.*;
+import com.nerotek01.deliveryman.logging.LogLevel;
+import com.nerotek01.deliveryman.logging.PluginLogger;
+import com.nerotek01.deliveryman.managers.AddonManager;
+import com.nerotek01.deliveryman.managers.ConfigManager;
+import com.nerotek01.deliveryman.managers.DataManager;
+import com.nerotek01.deliveryman.managers.RewardsManager;
 import com.nerotek01.deliveryman.menus.RewardMenu;
-import com.nerotek01.deliveryman.skins.SkinCache;
-import com.nerotek01.deliveryman.utils.DependUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -27,16 +32,16 @@ public class Main extends JavaPlugin {
     private boolean debugMode;
 
     private ConfigManager cm;
-    private Settings lang, rewards;
+    private Settings lang;
+    private Settings rewards;
 
     private RewardsManager rm;
     private RewardMenu rem;
     private DataManager dm;
     private Database db;
-    private NPCManager npc;
-    private SkinCache sc;
-    private VersionController vc;
     private AddonManager adm;
+    private RedisCache redis;
+    private PluginLogger pluginLogger;
 
     private BukkitTask task;
 
@@ -47,18 +52,21 @@ public class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
+
+        pluginLogger = new PluginLogger(this);
+
         getConfig().options().copyDefaults(true);
         saveConfig();
 
         cm = new ConfigManager(this);
-        new DependUtils(this).loadDepends();
-        sc = new SkinCache(this);
 
-        debugMode = getConfig().getBoolean("debugMode");
+        pluginLogger.setLevel(LogLevel.fromString(getConfig().getString("logLevel", "INFO"), LogLevel.INFO));
+        debugMode = getConfig().getBoolean("debugMode", false);
+        pluginLogger.setDebug(debugMode);
+
         lang = new Settings(this, "lang", true, false);
         rewards = new Settings(this, "rewards", false, false);
 
-        vc = new VersionController(this);
         adm = new AddonManager(this);
         adm.loadAddons();
 
@@ -66,34 +74,82 @@ public class Main extends JavaPlugin {
         rem = new RewardMenu(this);
         dm = new DataManager();
 
-        db = cm.getDbType().equals(DBType.MYSQL) ? new MySQLDatabase(this) : new SQLDatabase(this);
+        try {
+            db = createDatabase();
+        } catch (Throwable ex) {
+            pluginLogger.severe("Failed to initialize database backend", ex);
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
 
-        npc = new NPCManager(this);
+        redis = new RedisCache(this);
+        redis.connect();
+        if (redis.isEnabled()) {
+            db = new CachedDatabase(this, db, redis);
+        }
+        pluginLogger.info("Database: " + db.backendName());
 
-        getCommand("deliveryman").setExecutor((CommandExecutor) new DeliveryManCMD(this));
-        Bukkit.getPluginManager().registerEvents((Listener) new PlayerListener(this), this);
-        Bukkit.getPluginManager().registerEvents((Listener) new MenuListener(this), this);
+        var cmd = getCommand("deliveryman");
+        if (cmd != null) {
+            var executor = new DeliveryManCMD(this);
+            cmd.setExecutor(executor);
+            cmd.setTabCompleter(executor);
+        }
+
+        Bukkit.getPluginManager().registerEvents(new PlayerListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new MenuListener(this), this);
 
         startRewardMenuUpdater();
     }
 
     @Override
     public void onDisable() {
-        if (task != null) task.cancel();
-        for (Player player : Bukkit.getOnlinePlayers()) db.savePlayerSync(player);
-        if (db != null) db.close();
+        try {
+            if (task != null) {
+                task.cancel();
+                task = null;
+            }
+            if (db != null) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    try {
+                        db.savePlayerSync(player);
+                    } catch (Exception ex) {
+                        if (pluginLogger != null) {
+                            pluginLogger.warning("Failed to save player data during shutdown: " + player.getName(), ex);
+                        }
+                    }
+                }
+                try {
+                    db.close();
+                } catch (Exception ex) {
+                    if (pluginLogger != null) pluginLogger.warning("Error closing database", ex);
+                }
+            }
+            if (redis != null) {
+                redis.close();
+            }
+        } catch (Exception ex) {
+            if (pluginLogger != null) pluginLogger.severe("Error during plugin disable", ex);
+        }
     }
 
     public void reload() {
-        if (task != null) task.cancel();
+        if (task != null) {
+            task.cancel();
+            task = null;
+        }
         reloadConfig();
-        debugMode = getConfig().getBoolean("debugMode");
+        debugMode = getConfig().getBoolean("debugMode", false);
+        if (pluginLogger != null) {
+            pluginLogger.setDebug(debugMode);
+            pluginLogger.setLevel(LogLevel.fromString(getConfig().getString("logLevel", "INFO"), LogLevel.INFO));
+        }
         lang.reload();
         rewards.reload();
-        npc.reload();
         rm.reload();
         adm.loadAddons();
         startRewardMenuUpdater();
+        pluginLogger.info("Configuration reloaded.");
     }
 
     private void startRewardMenuUpdater() {
@@ -102,13 +158,13 @@ public class Main extends JavaPlugin {
         }
     }
 
-    public void sendDebugMessage(String... messages) {
-        if (!debugMode) return;
-        for (String msg : messages) Bukkit.getConsoleSender().sendMessage("§b[UDM Debug] §e" + msg);
-    }
-
-    public void sendLogMessage(String... messages) {
-        for (String msg : messages) Bukkit.getConsoleSender().sendMessage("§c§lUltraDM §8| §e" + msg);
+    private Database createDatabase() {
+        DBType type = cm.getDbType();
+        return switch (type) {
+            case MYSQL -> new MySQLDatabase(this);
+            case MONGODB -> new MongoDBDatabase(this);
+            case SQL, FLATFILE -> new SQLDatabase(this);
+        };
     }
 
     public boolean isDebugMode() { return debugMode; }
@@ -119,10 +175,9 @@ public class Main extends JavaPlugin {
     public DataManager getDm() { return dm; }
     public ConfigManager getCm() { return cm; }
     public Database getDb() { return db; }
-    public NPCManager getNpc() { return npc; }
-    public SkinCache getSc() { return sc; }
-    public VersionController getVc() { return vc; }
     public AddonManager getAdm() { return adm; }
+    public RedisCache getRedis() { return redis; }
+    public PluginLogger getPluginLogger() { return pluginLogger; }
     public BukkitTask getTask() { return task; }
     public Gson getGson() { return gson; }
 }
