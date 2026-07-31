@@ -1,24 +1,36 @@
 debugMode: false
-deliverySkin: "a2f98472-b3cf-4bc3-936e-cbf0a4ff1729"
+
+logLevel: INFO
+
 addons:
-  CMI: false
-  HolographicDisplays: true
-  Holograms: false
-  TrHologram: false
-  ServerNPC: false
   Votifier: false
   PlaceholderAPI: false
   MVdWPlaceholderAPI: false
+
 interact:
   right: true
   left: true
+
 rewardsMenu:
   instantUpdate: true
   rows: 5
+
 database:
-  type: SQL
+  type: MONGODB
   host: 127.0.0.1
-  port: 3306
+  port: 27017
   database: DeliveryMan
-  username: admin
-  password: 123
+  username: ""
+  password: ""
+  useSSL: false
+  authSource: admin
+
+redis:
+  enabled: false
+  host: 127.0.0.1
+  port: 6379
+  password: ""
+  database: 0
+  timeout: 5000
+  prefix: "deliveryman:"
+  ttl: 3600
