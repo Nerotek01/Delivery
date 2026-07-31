@@ -19,18 +19,13 @@ public class Placeholders extends PlaceholderExpansion {
     }
 
     @Override
-    public String getPlugin() {
-        return null;
-    }
-
-    @Override
     public String getAuthor() {
-        return "Leonardo0013YT";
+        return "Nerotek01";
     }
 
     @Override
     public String getVersion() {
-        return "1.0.0";
+        return plugin.getDescription().getVersion();
     }
 
     @Override
@@ -40,9 +35,10 @@ public class Placeholders extends PlaceholderExpansion {
 
     @Override
     public String onPlaceholderRequest(Player p, String id) {
+        if (p == null) return "";
         PlayerData pd = this.plugin.getDm().getPlayerData(p);
         if ("rewards".equals(id)) {
-            return String.valueOf(this.plugin.getRm().getRewards(p, pd));
+            return String.valueOf(this.plugin.getRm().getAvailableRewards(p, pd));
         }
         return "";
     }
