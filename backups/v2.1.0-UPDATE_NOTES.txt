@@ -1,0 +1,80 @@
+DeliveryMan Plugin - Source Backup v2.1.0
+==========================================
+
+Repository: https://github.com/Nerotek01/Delivery-Man-Plugin
+Branch:     main
+Commit:     13c1d03 (chore: clean resource configuration files and add gitignore)
+Date:       2026-08-02
+
+Build System
+------------
+- Maven 3.x (pom.xml)
+- Java 21 source/target
+- maven-shade-plugin 3.6.0 with package relocation
+- Output artifact: target/DeliveryMan-2.1.0.jar
+
+Source Layout
+-------------
+- src/main/java/com/nerotek01/deliveryman/
+  - Main.java
+  - api/DeliveryPlayerLoadEvent.java
+  - cache/RedisCache.java
+  - cmds/DeliveryManCMD.java
+  - config/Settings.java
+  - database/{CachedDatabase,MongoDBDatabase,MySQLDatabase,SQLDatabase}.java
+  - enums/{DBType,RewardType}.java
+  - interfaces/Database.java
+  - listeners/{MenuListener,PlayerListener,VotifierListener}.java
+  - logging/{LogLevel,PluginLogger}.java
+  - managers/{AddonManager,ConfigManager,DataManager,RewardsManager}.java
+  - menus/RewardMenu.java
+  - placeholders/{MVdWPlaceholders,Placeholders}.java
+  - rewards/{Reward,RewardStatus}.java
+  - utils/{InstantFirework,ItemUtils,NBTEditor}.java
+  - xseries/{XMaterial,XSound}.java
+- src/main/resources/
+  - plugin.yml (version placeholder: ${project.version})
+  - config.yml
+  - lang.yml
+  - rewards.yml
+
+Dependencies
+------------
+- org.spigotmc:spigot:1.8.8-R0.1-SNAPSHOT (provided)
+- com.google.code.gson:gson:2.10.1 (compile)
+- com.googlecode.json-simple:json-simple:1.1.1 (compile)
+- org.mongodb:mongodb-driver-sync:5.1.4 (compile)
+- redis.clients:jedis:5.1.5 (compile)
+- com.zaxxer:HikariCP:5.1.0 (compile)
+- org.slf4j:slf4j-jdk14:2.0.13 (compile)
+- org.xerial:sqlite-jdbc:3.46.1.3 (compile)
+- me.clip:placeholderapi:2.11.6 (provided, optional)
+- com.github.NuVotifier:NuVotifier:2.7.2 (provided, optional)
+
+Relocations (shade)
+-------------------
+- com.zaxxer.hikari       -> com.nerotek01.libs.hikari
+- com.mongodb             -> com.nerotek01.libs.mongodb
+- org.bson                -> com.nerotek01.libs.bson
+- redis.clients.jedis     -> com.nerotek01.libs.jedis
+- org.apache.commons.pool2-> com.nerotek01.libs.pool2
+- com.google.gson         -> com.nerotek01.libs.gson
+- org.json.simple         -> com.nerotek01.libs.jsonsimple
+- org.slf4j               -> com.nerotek01.libs.slf4j
+
+Update Notes for Next Version (2.2.0)
+-------------------------------------
+- Migrate build system from Maven to Gradle 8.10.2.
+- Replace pom.xml with build.gradle (Groovy DSL) + settings.gradle.
+- Add Gradle Wrapper (gradlew, gradlew.bat, gradle/wrapper/*).
+- Use com.github.johnrengelman.shadow plugin for relocation parity.
+- Update plugin.yml version resolution (Gradle processResources).
+- Update README.md build instructions for Gradle.
+- Update .gitignore for Gradle artifacts (.gradle/, build/).
+- Bump version to 2.2.0 (SemVer minor: build tooling feature).
+
+State
+-----
+- No source code (Java) modifications in this backup step.
+- All 32 Java files preserved as-is.
+- Resource files preserved as-is.
