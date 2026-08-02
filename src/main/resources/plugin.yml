@@ -1,6 +1,6 @@
 name: DeliveryMan
 main: com.nerotek01.deliveryman.Main
-version: ${project.version}
+version: ${version}
 api-version: 1.13
 author: Nerotek01
 description: DeliveryMan plugin with MongoDB, Redis, MySQL and SQLite backend support.
