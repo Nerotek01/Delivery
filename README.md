@@ -28,32 +28,39 @@ A high-performance Minecraft rewards plugin developed by Nerotek01. Provides a c
 - Cooldown system with configurable time units (days, hours, minutes, seconds) and human-readable countdown formatting in the menu lore.
 - Per-reward permission gating with a custom no-permission message, sound, volume, and pitch.
 - Per-reward firework explosion effect on claim.
-- Console command execution on claim with `<player>` placeholder substitution.
-- Automatic menu refresh every second for any player currently viewing the rewards menu (toggleable via `rewardsMenu.instantUpdate`).
+- Console command execution on claim with `<player>` placeholder substitution. Player names are sanitized to `[A-Za-z0-9_]` before substitution to prevent command injection on offline-mode servers.
+- Automatic menu refresh every second for any player currently viewing the rewards menu (toggleable via `rewardsMenu.instantUpdate`). All inventory mutations are performed on the main server thread to comply with the Bukkit threading contract.
 - Join messages showing the number of available rewards (or a no-rewards message when zero are available).
 - Multi-backend persistence abstraction (`Database` interface) with three production-ready implementations:
-  - `SQLDatabase` - SQLite backend, JSON-serialized player data.
-  - `MySQLDatabase` - HikariCP-backed MySQL/MariaDB backend.
+  - `SQLDatabase` - SQLite backend, JSON-serialized player data, guarded by a `ReentrantLock` to serialize access to the shared JDBC `Connection`.
+  - `MySQLDatabase` - HikariCP-backed MySQL/MariaDB backend. The database name in the JDBC URL is URL-encoded to prevent JDBC parameter injection.
   - `MongoDBDatabase` - MongoDB backend using the official sync driver.
 - Optional Redis cache layer (`CachedDatabase`) implementing a write-through cache strategy:
-  - Cache hit returns the player data without touching the backend.
-  - Cache miss delegates to the backend and writes the result back to Redis.
-  - All writes go to both the cache and the backend.
+  - Cache HIT path is dispatched asynchronously so the join/quit flow on the main thread never blocks on Redis I/O.
+  - Cache MISS delegates to the backend and writes the result back to Redis asynchronously.
+  - All writes schedule an async SET on the cache in addition to the backend write.
 - Graceful degradation: if Redis is unavailable, the plugin continues to work with the configured backend only.
+- Live Redis cache reload: changing `redis.*` keys and running `/udm reload` reconfigures the Jedis pool without restarting the server.
+- Atomic configuration reload: `ConfigManager.reload` parses all values into local variables first, then assigns them to fields only if every value parses successfully. An invalid `database.type` falls back to `MONGODB` instead of leaving the plugin in a half-reloaded state.
+- Addon hooks (Votifier, PlaceholderAPI, MVdWPlaceholderAPI) are registered exactly once per plugin lifetime. Reloading the configuration does not register duplicate listeners or duplicate placeholder expansions, preventing duplicated vote rewards and double registrations.
 - PlaceholderAPI integration exposing the `%udm_rewards%` placeholder (returns the number of available rewards for the player).
 - MVdWPlaceholderAPI integration via reflection, exposing the `udm_rewards` placeholder (no compile-time dependency required).
 - NuVotifier integration for vote-based rewards.
 - Custom API event `DeliveryPlayerLoadEvent` fired on the main thread whenever a player's data finishes loading.
 - Custom plugin logger (`PluginLogger`) with configurable log levels (`NONE`, `SEVERE`, `WARNING`, `INFO`, `FINE`, `ALL`) and a debug mode.
-- Thread-safe player data storage using `ConcurrentHashMap` for both claimed rewards and streak maps.
-- Atomic shutdown procedure: on disable, all online players are synchronously saved to the backend before connections are closed.
+- Thread-safe player data storage using `ConcurrentHashMap` for the player cache, the saving-flag set, and the voting map. `getPlayerData` returns the existing `PlayerData` (or `null`) without silently creating one; `getOrCreatePlayerData` is the explicit create-on-demand accessor.
+- Save race protection: a `markSaving`/`unmarkSaving` flag prevents the same player from being enqueued for save twice when `PlayerKickEvent` is followed by `PlayerQuitEvent`. The cache is no longer cleared by `savePlayer`'s `finally` block, eliminating the data-loss window if the player rejoins while an async save is still in flight.
+- Voting map cleanup: when a player disconnects, every entry keyed by their name is removed from the voting map to prevent unbounded growth on rotated player populations.
+- Menu identity verification: the rewards menu is identified by both the configured inventory title and the expected row count, so any other inventory that happens to share the same title is no longer hijacked.
+- Reward load resilience: invalid `type`, `timeUnit`, or `material` values in `rewards.yml` are reported with a clear warning and fall back to safe defaults (`NORMAL`, `DAYS`, `CHEST`) instead of crashing the plugin.
+- Atomic shutdown procedure: on disable, all online players are synchronously saved to the backend before connections are closed, and the in-memory player cache is cleared.
 
 ## Commands
 
 | Command | Permission | Description |
 |---------|------------|-------------|
 | `/deliveryman menu` | `deliveryman.menu` | Opens the rewards menu (players only). |
-| `/deliveryman reload` | `deliveryman.admin` | Reloads `config.yml`, `lang.yml`, `rewards.yml`, addons, and the menu updater. |
+| `/deliveryman reload` | `deliveryman.admin` | Reloads `config.yml`, `lang.yml`, `rewards.yml`, addons, the Redis pool, and the menu updater. If the reload fails, the previous configuration remains in effect. |
 
 Alias: `/udm`
 
@@ -124,19 +131,19 @@ Each reward is defined under the `rewards` key. The following fields are support
 |-------|----------|-------------|
 | `id` | yes | Unique identifier for the reward. |
 | `slot` | yes | Inventory slot (0 to rows*9 - 1). |
-| `type` | yes | One of `NORMAL`, `UNIQUE`, `MESSAGE`, `VOTE`. |
+| `type` | yes | One of `NORMAL`, `UNIQUE`, `MESSAGE`, `VOTE`. Invalid values fall back to `NORMAL`. |
 | `permission` | yes | Permission required to claim. |
 | `countdown` | NORMAL, VOTE | Cooldown value. |
-| `timeUnit` | NORMAL, VOTE | One of `DAYS`, `HOURS`, `MINUTES`, `SECONDS`. |
+| `timeUnit` | NORMAL, VOTE | One of `DAYS`, `HOURS`, `MINUTES`, `SECONDS`. Invalid values fall back to `DAYS`. |
 | `message` | MESSAGE, VOTE | Multi-line message sent on click. |
 | `voteSite` | VOTE | Service name that triggers the vote reward. |
 | `fireworkExplode` | no | Spawn an instant firework on claim. Defaults to false. |
-| `rewards` | NORMAL, UNIQUE, VOTE | List of console commands to execute. `<player>` is replaced with the player's name. |
+| `rewards` | NORMAL, UNIQUE, VOTE | List of console commands to execute. `<player>` is replaced with the sanitized player name. |
 | `noPermission.sound` | no | Sound played when the player lacks permission. |
 | `noPermission.volume` | no | Volume (0 to 10). Defaults to 1. |
 | `noPermission.pitch` | no | Pitch (0 to 10). Defaults to 1. |
 | `noPermission.message` | no | Message sent when the player lacks permission. |
-| `noClaimed.material` | yes | Material of the icon when not claimed. |
+| `noClaimed.material` | yes | Material of the icon when not claimed. Invalid values fall back to `CHEST`. |
 | `noClaimed.data` | yes | Data value of the material. |
 | `noClaimed.amount` | yes | Stack size. |
 | `noClaimed.name` | yes | Display name. `<status>` is replaced with the status color. |
@@ -191,7 +198,7 @@ cd Delivery-Man-Plugin
 
 On Windows, use `gradlew.bat` instead of `./gradlew`.
 
-The compiled artifact will be at `build/libs/DeliveryMan-<version>.jar` (for example `build/libs/DeliveryMan-2.2.0.jar`). The `-slim` jar in the same directory is the non-shaded intermediate output and is not intended for direct installation on a server.
+The compiled artifact will be at `build/libs/DeliveryMan-<version>.jar` (for example `build/libs/DeliveryMan-2.3.0.jar`). The `-slim` jar in the same directory is the non-shaded intermediate output and is not intended for direct installation on a server.
 
 ### Build System Details
 
