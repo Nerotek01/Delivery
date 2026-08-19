@@ -10,7 +10,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
+import java.util.regex.Pattern;
+
 public class VotifierListener implements Listener {
+    private static final Pattern SAFE_NAME = Pattern.compile("[^A-Za-z0-9_]");
+
     private final Main plugin;
 
     public VotifierListener(Main plugin) {
@@ -34,6 +38,9 @@ public class VotifierListener implements Listener {
             Reward reward = plugin.getRm().getRewards().get(rewardId);
             if (reward == null) return;
             PlayerData pd = plugin.getDm().getPlayerData(p);
+            if (pd == null) {
+                pd = plugin.getDm().getOrCreatePlayerData(p);
+            }
 
             String message = reward.getNoClaimed().getMessage();
             if (message != null) {
@@ -55,10 +62,17 @@ public class VotifierListener implements Listener {
 
     private void executeCommands(Player p, Iterable<String> commands) {
         if (commands == null) return;
-        String playerName = p.getName();
+        String safeName = sanitizeName(p.getName());
         for (String cmd : commands) {
             if (cmd == null || cmd.isEmpty()) continue;
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd.replace("<player>", playerName));
+            String resolved = cmd.replace("<player>", safeName);
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), resolved);
         }
+    }
+
+    private String sanitizeName(String name) {
+        if (name == null) return "";
+        String cleaned = SAFE_NAME.matcher(name).replaceAll("");
+        return cleaned.isEmpty() ? name : cleaned;
     }
 }

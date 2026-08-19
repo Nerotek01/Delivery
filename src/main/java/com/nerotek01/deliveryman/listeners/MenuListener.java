@@ -15,9 +15,17 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.regex.Pattern;
 
 public class MenuListener implements Listener {
+    private static final String NBT_KEY = "ULTRADM";
+    private static final String NBT_FIELD = "ID";
+    private static final Pattern SAFE_NAME = Pattern.compile("[^A-Za-z0-9_]");
+
     private final Main plugin;
 
     public MenuListener(Main plugin) {
@@ -33,26 +41,21 @@ public class MenuListener implements Listener {
 
     @EventHandler
     public void onOpen(InventoryOpenEvent e) {
-        if (e.getPlayer() instanceof Player) {
-            String title = e.getView().getTitle();
-            String expected = plugin.getLang().get("menus.rewards.title");
-            if (expected != null && expected.equals(title)) {
-                plugin.getRem().add((Player) e.getPlayer());
-            }
-        }
+        if (!(e.getPlayer() instanceof Player)) return;
+        if (!isRewardMenu(e.getInventory())) return;
+        plugin.getRem().add((Player) e.getPlayer());
     }
 
     @EventHandler
     public void onMenu(InventoryClickEvent e) {
         if (!(e.getWhoClicked() instanceof Player)) return;
-        String title;
+        Inventory topInventory;
         try {
-            title = e.getView().getTitle();
+            topInventory = e.getView().getTopInventory();
         } catch (Throwable ignored) {
             return;
         }
-        String expected = plugin.getLang().get("menus.rewards.title");
-        if (expected == null || !expected.equals(title)) return;
+        if (topInventory == null || !isRewardMenu(topInventory)) return;
 
         if (e.getSlotType() == InventoryType.SlotType.OUTSIDE
                 || e.getCurrentItem() == null
@@ -63,14 +66,33 @@ public class MenuListener implements Listener {
         e.setCancelled(true);
         Player p = (Player) e.getWhoClicked();
         ItemStack item = e.getCurrentItem();
-        String id = NBTEditor.getString(item, "ULTRADM", "ID");
+        String id = NBTEditor.getString(item, NBT_KEY, NBT_FIELD);
         if (id == null) return;
 
         Reward reward = plugin.getRm().getRewards().get(id);
         if (reward == null) return;
 
         PlayerData pd = plugin.getDm().getPlayerData(p);
+        if (pd == null) {
+            pd = plugin.getDm().getOrCreatePlayerData(p);
+        }
         handleRewardClick(p, pd, reward);
+    }
+
+    private boolean isRewardMenu(Inventory inventory) {
+        if (inventory == null) return false;
+        int size = inventory.getSize();
+        int expectedSize = plugin.getCm().getRewardsRows() * 9;
+        if (size != expectedSize) return false;
+        String expected = plugin.getLang().get("menus.rewards.title");
+        if (expected == null) return false;
+        String title;
+        try {
+            title = inventory.getTitle();
+        } catch (Throwable ignored) {
+            return false;
+        }
+        return expected.equals(title);
     }
 
     private void handleRewardClick(Player p, PlayerData pd, Reward reward) {
@@ -133,10 +155,17 @@ public class MenuListener implements Listener {
 
     private void executeCommands(Player p, Iterable<String> commands) {
         if (commands == null) return;
-        String playerName = p.getName();
+        String safeName = sanitizeName(p.getName());
         for (String cmd : commands) {
             if (cmd == null || cmd.isEmpty()) continue;
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd.replace("<player>", playerName));
+            String resolved = cmd.replace("<player>", safeName);
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), resolved);
         }
+    }
+
+    private String sanitizeName(String name) {
+        if (name == null) return "";
+        String cleaned = SAFE_NAME.matcher(name).replaceAll("");
+        return cleaned.isEmpty() ? name : cleaned;
     }
 }
