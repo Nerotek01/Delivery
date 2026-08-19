@@ -2,9 +2,10 @@ package com.nerotek01.deliveryman.listeners;
 
 import com.nerotek01.deliveryman.Main;
 import com.nerotek01.deliveryman.data.PlayerData;
-import com.nerotek01.deliveryman.enums.RewardType;
+import com.nerotek01.deliveryman.menus.RewardMenu;
 import com.nerotek01.deliveryman.rewards.Reward;
-import com.nerotek01.deliveryman.utils.InstantFirework;
+import com.nerotek01.deliveryman.utils.CountdownFormatter;
+import com.nerotek01.deliveryman.utils.ItemBurstEffect;
 import com.nerotek01.deliveryman.utils.NBTEditor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -17,7 +18,6 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.regex.Pattern;
 
@@ -57,15 +57,23 @@ public class MenuListener implements Listener {
         }
         if (topInventory == null || !isRewardMenu(topInventory)) return;
 
-        if (e.getSlotType() == InventoryType.SlotType.OUTSIDE
-                || e.getCurrentItem() == null
-                || e.getCurrentItem().getType() == Material.AIR) {
+        e.setCancelled(true);
+        Player p = (Player) e.getWhoClicked();
+
+        if (e.getSlotType() == InventoryType.SlotType.OUTSIDE) return;
+
+        int slot = e.getRawSlot();
+        if (slot == RewardMenu.CLOSE_SLOT) {
+            p.closeInventory();
+            return;
+        }
+        if (slot == RewardMenu.INFO_SLOT) {
             return;
         }
 
-        e.setCancelled(true);
-        Player p = (Player) e.getWhoClicked();
         ItemStack item = e.getCurrentItem();
+        if (item == null || item.getType() == Material.AIR) return;
+
         String id = NBTEditor.getString(item, NBT_KEY, NBT_FIELD);
         if (id == null) return;
 
@@ -111,7 +119,14 @@ public class MenuListener implements Listener {
                 claimReward(p, pd, reward);
                 return;
             }
-            sendMessages(p, reward.getClaimed().getMessage());
+            String countdownStr = CountdownFormatter.format(plugin, remaining);
+            String message = reward.getClaimed().getMessage();
+            if (message != null) {
+                message = message
+                        .replace("<cooldown>", countdownStr)
+                        .replace("<reward>", reward.getClaimed().getName());
+            }
+            sendMessages(p, message);
             reward.getClaimed().playSound(p);
         } else {
             claimReward(p, pd, reward);
@@ -119,30 +134,17 @@ public class MenuListener implements Listener {
     }
 
     private void claimReward(Player p, PlayerData pd, Reward reward) {
-        if (reward.isFireworkExplode()) {
-            new InstantFirework(p.getLocation().clone().add(0, 1, 0));
-        }
+        new ItemBurstEffect(plugin, p);
 
-        switch (reward.getType()) {
-            case NORMAL, UNIQUE -> {
-                String message = reward.getNoClaimed().getMessage()
-                        .replace("<reward>", reward.getNoClaimed().getName())
-                        .replace("<status>", "\u00a7e");
-                sendMessages(p, message);
-                pd.claim(reward.getId(), System.currentTimeMillis());
-                executeCommands(p, reward.getRewards());
-                p.closeInventory();
-            }
-            case MESSAGE, VOTE -> {
-                sendMessages(p, reward.getMessage());
-                p.closeInventory();
-            }
+        String message = reward.getNoClaimed().getMessage();
+        if (message != null) {
+            message = message
+                    .replace("<reward>", reward.getNoClaimed().getName())
+                    .replace("<status>", "\u00a7e");
         }
-
-        if (reward.getType() == RewardType.VOTE) {
-            plugin.getDm().setVoting(p.getName(), reward.getVoteSite());
-        }
-
+        sendMessages(p, message);
+        pd.claim(reward.getId(), System.currentTimeMillis());
+        executeCommands(p, reward.getRewards());
         reward.getNoClaimed().playSound(p);
     }
 

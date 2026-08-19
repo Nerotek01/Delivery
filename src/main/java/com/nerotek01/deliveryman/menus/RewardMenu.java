@@ -3,17 +3,24 @@ package com.nerotek01.deliveryman.menus;
 import com.nerotek01.deliveryman.Main;
 import com.nerotek01.deliveryman.data.PlayerData;
 import com.nerotek01.deliveryman.rewards.Reward;
+import com.nerotek01.deliveryman.utils.CountdownFormatter;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 public class RewardMenu {
+    public static final int CLOSE_SLOT = 40;
+    public static final int INFO_SLOT = 44;
+
     private final Main plugin;
     private final Set<UUID> activeViews = ConcurrentHashMap.newKeySet();
 
@@ -33,6 +40,9 @@ public class RewardMenu {
         final PlayerData finalPd = playerData;
         plugin.getRm().getRewards().values().forEach(reward ->
                 inventory.setItem(reward.getSlot(), createRewardIcon(player, finalPd, reward)));
+
+        inventory.setItem(CLOSE_SLOT, createCloseButton());
+        inventory.setItem(INFO_SLOT, createInfoBook());
 
         player.openInventory(inventory);
         activeViews.add(player.getUniqueId());
@@ -70,7 +80,7 @@ public class RewardMenu {
                 activeViews.remove(playerId);
                 continue;
             }
-            Bukkit.getScheduler().runTask(plugin, () -> updateInventory(player, openInventory));
+            updateInventory(player, openInventory);
         }
     }
 
@@ -82,6 +92,8 @@ public class RewardMenu {
         }
         plugin.getRm().getRewards().values().forEach(reward ->
                 inventory.setItem(reward.getSlot(), createRewardIcon(player, playerData, reward)));
+        inventory.setItem(CLOSE_SLOT, createCloseButton());
+        inventory.setItem(INFO_SLOT, createInfoBook());
     }
 
     private ItemStack createRewardIcon(Player player, PlayerData playerData, Reward reward) {
@@ -93,35 +105,42 @@ public class RewardMenu {
                 playerData.resetClaim(reward.getId());
                 return reward.getIcon(player, false, "");
             }
-            return reward.getIcon(player, true, formatCountdown(remaining));
+            return reward.getIcon(player, true, CountdownFormatter.format(plugin, remaining));
         }
         return reward.getIcon(player, false, "");
     }
 
-    private String formatCountdown(long millis) {
-        long seconds = millis / 1000L;
-        long days = TimeUnit.SECONDS.toDays(seconds);
-        long hours = seconds / 3600L - days * 24L;
-        long minutes = seconds / 60L - seconds / 3600L * 60L;
-        long secs = seconds - seconds / 60L * 60L;
-
-        String timeFormat;
-        if (days > 0) {
-            timeFormat = plugin.getLang().get("countdown.days");
-        } else if (hours > 0) {
-            timeFormat = plugin.getLang().get("countdown.hours");
-        } else if (minutes > 0) {
-            timeFormat = plugin.getLang().get("countdown.minutes");
-        } else {
-            timeFormat = plugin.getLang().get("countdown.seconds");
+    private ItemStack createCloseButton() {
+        ItemStack item = new ItemStack(Material.BARRIER, 1);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName("\u00a7cClose");
+            item.setItemMeta(meta);
         }
-        if (timeFormat == null) timeFormat = "<seconds>s";
+        return item;
+    }
 
-        return timeFormat
-                .replace("<days>", String.valueOf(days))
-                .replace("<hours>", String.valueOf(hours))
-                .replace("<minutes>", String.valueOf(minutes))
-                .replace("<seconds>", String.valueOf(secs));
+    private ItemStack createInfoBook() {
+        ItemStack item = new ItemStack(Material.WRITTEN_BOOK, 1);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName("\u00a76\u00a7lMenu Guide");
+            List<String> lore = Arrays.asList(
+                    "\u00a77",
+                    "\u00a77Welcome to the Mystery Dust",
+                    "\u00a77Delivery menu!",
+                    "\u00a77",
+                    "\u00a77Claim your daily and rank-based",
+                    "\u00a77rewards here. Each reward has",
+                    "\u00a77a cooldown shown in its lore.",
+                    "\u00a77",
+                    "\u00a7eClick an available reward to",
+                    "\u00a7eclaim it instantly!"
+            );
+            meta.setLore(lore);
+            item.setItemMeta(meta);
+        }
+        return item;
     }
 
     public void add(Player player) {
@@ -130,10 +149,6 @@ public class RewardMenu {
 
     public void remove(Player player) {
         activeViews.remove(player.getUniqueId());
-    }
-
-    public void removeViewer(Player player) {
-        remove(player);
     }
 
     public boolean isViewing(Player player) {
