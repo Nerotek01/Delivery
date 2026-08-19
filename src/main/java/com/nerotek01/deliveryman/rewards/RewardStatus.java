@@ -30,7 +30,7 @@ public class RewardStatus {
         try {
             parsedMaterial = Material.valueOf(plugin.getRewards().get(path + ".material"));
         } catch (IllegalArgumentException ex) {
-            plugin.getPluginLogger().warning("Invalid material '" + plugin.getRewards().get(path + ".material")
+            plugin.getLogger().warning("Invalid material '" + plugin.getRewards().get(path + ".material")
                     + "' for '" + path + "' - defaulting to CHEST.");
             parsedMaterial = Material.CHEST;
         }

@@ -2,7 +2,6 @@ package com.nerotek01.deliveryman.managers;
 
 import com.nerotek01.deliveryman.Main;
 import com.nerotek01.deliveryman.data.PlayerData;
-import com.nerotek01.deliveryman.enums.RewardType;
 import com.nerotek01.deliveryman.rewards.Reward;
 import org.bukkit.entity.Player;
 
@@ -12,7 +11,6 @@ import java.util.Map;
 public class RewardsManager {
     private final Main plugin;
     private final Map<String, Reward> rewards = new HashMap<>();
-    private final Map<String, String> votes = new HashMap<>();
 
     public RewardsManager(Main plugin) {
         this.plugin = plugin;
@@ -21,7 +19,6 @@ public class RewardsManager {
 
     public void reload() {
         rewards.clear();
-        votes.clear();
 
         var section = plugin.getRewards().getConfig().getConfigurationSection("rewards");
         if (section == null) return;
@@ -30,15 +27,12 @@ public class RewardsManager {
             try {
                 Reward reward = new Reward(plugin, "rewards." + r);
                 if (reward.getId() == null) {
-                    plugin.getPluginLogger().warning("Reward at 'rewards." + r + "' has no id - skipping.");
+                    plugin.getLogger().warning("Reward at 'rewards." + r + "' has no id - skipping.");
                     return;
                 }
                 rewards.put(reward.getId(), reward);
-                if (reward.getType() == RewardType.VOTE) {
-                    votes.put(reward.getVoteSite(), reward.getId());
-                }
             } catch (Throwable ex) {
-                plugin.getPluginLogger().warning("Failed to load reward 'rewards." + r + "': " + ex.getMessage());
+                plugin.getLogger().warning("Failed to load reward 'rewards." + r + "': " + ex.getMessage());
             }
         });
     }
@@ -48,11 +42,9 @@ public class RewardsManager {
 
         return (int) rewards.values().stream()
                 .filter(r -> p.hasPermission(r.getPermission()))
-                .filter(r -> r.getType() != RewardType.MESSAGE)
                 .filter(r -> !pd.getClaimed().containsKey(r.getId()))
                 .count();
     }
 
     public Map<String, Reward> getRewards() { return rewards; }
-    public Map<String, String> getVotes() { return votes; }
 }

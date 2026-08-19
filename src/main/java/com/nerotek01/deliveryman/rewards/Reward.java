@@ -1,7 +1,6 @@
 package com.nerotek01.deliveryman.rewards;
 
 import com.nerotek01.deliveryman.Main;
-import com.nerotek01.deliveryman.enums.RewardType;
 import com.nerotek01.deliveryman.utils.NBTEditor;
 import com.nerotek01.deliveryman.xseries.XSound;
 import org.bukkit.Sound;
@@ -14,39 +13,28 @@ import java.util.concurrent.TimeUnit;
 
 public class Reward {
 
+    private static final String NBT_KEY = "ULTRADM";
+    private static final String NBT_FIELD = "ID";
+
     private final String id;
     private final String permission;
-    private final String noPermissionMessage;
     private final int slot;
-    private final RewardType type;
     private final RewardStatus noClaimed;
     private final RewardStatus claimed;
     private final List<String> rewards;
     private final float noPermissionVolume;
     private final float noPermissionPitch;
-    private final boolean fireworkExplode;
     private final Sound noPermissionSound;
+    private final String noPermissionMessage;
 
-    private String message = "";
-    private String voteSite = "";
     private int countdown = 999999;
     private TimeUnit unit = TimeUnit.DAYS;
 
     public Reward(Main plugin, String path) {
         this.id = plugin.getRewards().get(path + ".id");
 
-        RewardType parsedType;
-        try {
-            parsedType = RewardType.valueOf(plugin.getRewards().get(path + ".type"));
-        } catch (IllegalArgumentException ex) {
-            plugin.getPluginLogger().warning("Invalid reward type for '" + path + "' - defaulting to NORMAL.");
-            parsedType = RewardType.NORMAL;
-        }
-        this.type = parsedType;
-
         this.permission = plugin.getRewards().get(path + ".permission");
         this.slot = plugin.getRewards().getInt(path + ".slot");
-        this.fireworkExplode = plugin.getRewards().getBooleanOrDefault(path + ".fireworkExplode", false);
 
         this.noPermissionSound = XSound.matchXSound(
                         plugin.getRewards().getOrDefault(path + ".noPermission.sound",
@@ -58,23 +46,18 @@ public class Reward {
         this.noPermissionMessage = plugin.getRewards().getOrDefault(path + ".noPermission.message",
                 "&cYou don't have permission for this.");
 
-        if (type == RewardType.NORMAL || type == RewardType.VOTE) {
+        try {
             this.countdown = plugin.getRewards().getInt(path + ".countdown");
-            TimeUnit parsedUnit;
-            try {
-                parsedUnit = TimeUnit.valueOf(plugin.getRewards().get(path + ".timeUnit"));
-            } catch (IllegalArgumentException ex) {
-                plugin.getPluginLogger().warning("Invalid timeUnit for '" + path + "' - defaulting to DAYS.");
-                parsedUnit = TimeUnit.DAYS;
-            }
-            this.unit = parsedUnit;
+        } catch (Exception ignored) {
         }
-        if (type == RewardType.MESSAGE || type == RewardType.VOTE) {
-            this.message = plugin.getRewards().get(path + ".message");
+        TimeUnit parsedUnit;
+        try {
+            parsedUnit = TimeUnit.valueOf(plugin.getRewards().get(path + ".timeUnit"));
+        } catch (IllegalArgumentException ex) {
+            plugin.getLogger().warning("Invalid timeUnit for '" + path + "' - defaulting to DAYS.");
+            parsedUnit = TimeUnit.DAYS;
         }
-        if (type == RewardType.VOTE) {
-            this.voteSite = plugin.getRewards().get(path + ".voteSite");
-        }
+        this.unit = parsedUnit;
 
         this.noClaimed = new RewardStatus(plugin, path + ".noClaimed");
         this.claimed = new RewardStatus(plugin, path + ".claimed");
@@ -84,29 +67,25 @@ public class Reward {
 
     public String getId() { return id; }
     public String getPermission() { return permission; }
-    public String getMessage() { return message; }
-    public String getVoteSite() { return voteSite; }
     public String getNoPermissionMessage() { return noPermissionMessage; }
     public int getSlot() { return slot; }
     public int getCountdown() { return countdown; }
-    public RewardType getType() { return type; }
     public RewardStatus getNoClaimed() { return noClaimed; }
     public RewardStatus getClaimed() { return claimed; }
     public List<String> getRewards() { return rewards; }
     public float getNoPermissionVolume() { return noPermissionVolume; }
     public float getNoPermissionPitch() { return noPermissionPitch; }
-    public boolean isFireworkExplode() { return fireworkExplode; }
     public Sound getNoPermissionSound() { return noPermissionSound; }
     public TimeUnit getUnit() { return unit; }
 
     public ItemStack getIcon(Player p, boolean claimed, String countdownStr) {
         if (claimed) {
             return (ItemStack) NBTEditor.set(
-                    this.claimed.getIcon("\u00a7c", countdownStr), this.id, "ULTRADM", "ID");
+                    this.claimed.getIcon("\u00a7c", countdownStr), this.id, NBT_KEY, NBT_FIELD);
         }
         String color = p.hasPermission(this.permission) ? "\u00a7e" : "\u00a7c";
         return (ItemStack) NBTEditor.set(
-                this.noClaimed.getIcon(color, ""), this.id, "ULTRADM", "ID");
+                this.noClaimed.getIcon(color, ""), this.id, NBT_KEY, NBT_FIELD);
     }
 
     public void playSound(Player p) {
