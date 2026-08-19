@@ -1,7 +1,6 @@
 package com.nerotek01.deliveryman.cache;
 
 import com.nerotek01.deliveryman.Main;
-import com.nerotek01.deliveryman.logging.PluginLogger;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -12,7 +11,6 @@ import java.time.Duration;
 public class RedisCache {
 
     private final Main plugin;
-    private final PluginLogger logger;
     private volatile JedisPool pool;
     private volatile String prefix;
     private volatile int ttlSeconds;
@@ -20,12 +18,11 @@ public class RedisCache {
 
     public RedisCache(Main plugin) {
         this.plugin = plugin;
-        this.logger = plugin.getPluginLogger();
         loadConfig();
     }
 
     private void loadConfig() {
-        this.prefix = plugin.getConfig().getString("redis.prefix", "deliveryman:");
+        this.prefix = plugin.getConfig().getString("redis.prefix", "delivery:");
         this.ttlSeconds = plugin.getConfig().getInt("redis.ttl", 3600);
         this.enabled = plugin.getConfig().getBoolean("redis.enabled", false);
     }
@@ -76,11 +73,12 @@ public class RedisCache {
             try (Jedis jedis = pool.getResource()) {
                 jedis.ping();
             }
+            plugin.getLogger().info("Redis cache connected.");
         } catch (JedisConnectionException ex) {
-            logger.warning("Redis connection failed - caching disabled. Cause: " + ex.getMessage());
+            plugin.getLogger().warning("Redis connection failed - caching disabled. Cause: " + ex.getMessage());
             close();
         } catch (Exception ex) {
-            logger.warning("Redis initialization error - caching disabled. Cause: " + ex.getMessage());
+            plugin.getLogger().warning("Redis initialization error - caching disabled. Cause: " + ex.getMessage());
             close();
         }
     }
@@ -108,7 +106,7 @@ public class RedisCache {
                     jedis.set(full, value);
                 }
             } catch (Exception ex) {
-                logger.debug("Redis SET failed for key " + key + ": " + ex.getMessage());
+                plugin.getLogger().warning("Redis SET failed for key " + key + ": " + ex.getMessage());
             }
         };
         org.bukkit.Bukkit.getScheduler().runTaskAsynchronously(plugin, task);
@@ -121,7 +119,7 @@ public class RedisCache {
             try (Jedis jedis = pool.getResource()) {
                 jedis.del(full);
             } catch (Exception ex) {
-                logger.debug("Redis DEL failed for key " + key + ": " + ex.getMessage());
+                plugin.getLogger().warning("Redis DEL failed for key " + key + ": " + ex.getMessage());
             }
         };
         org.bukkit.Bukkit.getScheduler().runTaskAsynchronously(plugin, task);
@@ -133,47 +131,8 @@ public class RedisCache {
         try (Jedis jedis = pool.getResource()) {
             return jedis.get(full);
         } catch (Exception ex) {
-            logger.debug("Redis GET failed for key " + key + ": " + ex.getMessage());
+            plugin.getLogger().warning("Redis GET failed for key " + key + ": " + ex.getMessage());
             return null;
-        }
-    }
-
-    public void set(String key, String value) {
-        set(key, value, ttlSeconds);
-    }
-
-    public void set(String key, String value, int ttlOverride) {
-        if (!isEnabled()) return;
-        String full = prefix + key;
-        try (Jedis jedis = pool.getResource()) {
-            if (ttlOverride > 0) {
-                jedis.setex(full, ttlOverride, value);
-            } else {
-                jedis.set(full, value);
-            }
-        } catch (Exception ex) {
-            logger.debug("Redis SET failed for key " + key + ": " + ex.getMessage());
-        }
-    }
-
-    public void del(String key) {
-        if (!isEnabled()) return;
-        String full = prefix + key;
-        try (Jedis jedis = pool.getResource()) {
-            jedis.del(full);
-        } catch (Exception ex) {
-            logger.debug("Redis DEL failed for key " + key + ": " + ex.getMessage());
-        }
-    }
-
-    public boolean exists(String key) {
-        if (!isEnabled()) return false;
-        String full = prefix + key;
-        try (Jedis jedis = pool.getResource()) {
-            return jedis.exists(full);
-        } catch (Exception ex) {
-            logger.debug("Redis EXISTS failed for key " + key + ": " + ex.getMessage());
-            return false;
         }
     }
 

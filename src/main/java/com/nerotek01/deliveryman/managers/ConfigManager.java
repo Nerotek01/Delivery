@@ -1,22 +1,19 @@
 package com.nerotek01.deliveryman.managers;
 
 import com.nerotek01.deliveryman.Main;
-import com.nerotek01.deliveryman.enums.DBType;
 
 public class ConfigManager {
     private final Main plugin;
+    private boolean menuEnabled;
     private int rewardsRows;
-    private int port;
-    private String ip;
-    private String database;
-    private String username;
-    private String password;
-    private String authSource;
-    private DBType dbType;
-    private boolean instantUpdate;
-    private boolean right;
-    private boolean left;
-    private boolean useSSL;
+
+    private String dbHost;
+    private int dbPort;
+    private String dbDatabase;
+    private String dbUsername;
+    private String dbPassword;
+    private boolean dbUseSSL;
+    private String dbAuthSource;
 
     private boolean redisEnabled;
     private String redisHost;
@@ -33,27 +30,16 @@ public class ConfigManager {
     }
 
     public void reload() {
-        boolean newInstantUpdate = plugin.getConfig().getBoolean("rewardsMenu.instantUpdate", true);
-        boolean newRight = plugin.getConfig().getBoolean("interact.right", true);
-        boolean newLeft = plugin.getConfig().getBoolean("interact.left", true);
+        boolean newMenuEnabled = plugin.getConfig().getBoolean("rewardsMenu.enabled", true);
+        int newRewardsRows = Math.max(5, Math.min(6, plugin.getConfig().getInt("rewardsMenu.rows", 5)));
 
-        DBType newDbType;
-        String rawType = plugin.getConfig().getString("database.type", "MONGODB");
-        try {
-            newDbType = DBType.valueOf(rawType.toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            plugin.getLogger().warning("Invalid database.type '" + rawType + "' - defaulting to MONGODB.");
-            newDbType = DBType.MONGODB;
-        }
-
-        int newRewardsRows = Math.max(1, Math.min(6, plugin.getConfig().getInt("rewardsMenu.rows", 5)));
-        int newPort = plugin.getConfig().getInt("database.port", 27017);
-        String newIp = plugin.getConfig().getString("database.host", "127.0.0.1");
-        String newDatabase = plugin.getConfig().getString("database.database", "DeliveryMan");
-        String newUsername = plugin.getConfig().getString("database.username", "");
-        String newPassword = plugin.getConfig().getString("database.password", "");
-        boolean newUseSSL = plugin.getConfig().getBoolean("database.useSSL", false);
-        String newAuthSource = plugin.getConfig().getString("database.authSource", "admin");
+        String newDbHost = plugin.getConfig().getString("database.host", "127.0.0.1");
+        int newDbPort = plugin.getConfig().getInt("database.port", 27017);
+        String newDbDatabase = plugin.getConfig().getString("database.database", "Delivery");
+        String newDbUsername = plugin.getConfig().getString("database.username", "");
+        String newDbPassword = plugin.getConfig().getString("database.password", "");
+        boolean newDbUseSSL = plugin.getConfig().getBoolean("database.useSSL", false);
+        String newDbAuthSource = plugin.getConfig().getString("database.authSource", "admin");
 
         boolean newRedisEnabled = plugin.getConfig().getBoolean("redis.enabled", false);
         String newRedisHost = plugin.getConfig().getString("redis.host", "127.0.0.1");
@@ -61,21 +47,19 @@ public class ConfigManager {
         String newRedisPassword = plugin.getConfig().getString("redis.password", "");
         int newRedisDatabase = plugin.getConfig().getInt("redis.database", 0);
         int newRedisTimeout = plugin.getConfig().getInt("redis.timeout", 5000);
-        String newRedisPrefix = plugin.getConfig().getString("redis.prefix", "deliveryman:");
+        String newRedisPrefix = plugin.getConfig().getString("redis.prefix", "delivery:");
         int newRedisTtl = plugin.getConfig().getInt("redis.ttl", 3600);
 
-        this.instantUpdate = newInstantUpdate;
-        this.right = newRight;
-        this.left = newLeft;
-        this.dbType = newDbType;
+        this.menuEnabled = newMenuEnabled;
         this.rewardsRows = newRewardsRows;
-        this.port = newPort;
-        this.ip = newIp;
-        this.database = newDatabase;
-        this.username = newUsername;
-        this.password = newPassword;
-        this.useSSL = newUseSSL;
-        this.authSource = newAuthSource;
+
+        this.dbHost = newDbHost;
+        this.dbPort = newDbPort;
+        this.dbDatabase = newDbDatabase;
+        this.dbUsername = newDbUsername;
+        this.dbPassword = newDbPassword;
+        this.dbUseSSL = newDbUseSSL;
+        this.dbAuthSource = newDbAuthSource;
 
         this.redisEnabled = newRedisEnabled;
         this.redisHost = newRedisHost;
@@ -87,18 +71,16 @@ public class ConfigManager {
         this.redisTtl = newRedisTtl;
     }
 
+    public boolean isMenuEnabled() { return menuEnabled; }
     public int getRewardsRows() { return rewardsRows; }
-    public int getPort() { return port; }
-    public String getIp() { return ip; }
-    public String getDatabase() { return database; }
-    public String getUsername() { return username; }
-    public String getPassword() { return password; }
-    public String getAuthSource() { return authSource; }
-    public DBType getDbType() { return dbType; }
-    public boolean isInstantUpdate() { return instantUpdate; }
-    public boolean isRight() { return right; }
-    public boolean isLeft() { return left; }
-    public boolean isUseSSL() { return useSSL; }
+
+    public String getDbHost() { return dbHost; }
+    public int getDbPort() { return dbPort; }
+    public String getDbDatabase() { return dbDatabase; }
+    public String getDbUsername() { return dbUsername; }
+    public String getDbPassword() { return dbPassword; }
+    public boolean isDbUseSSL() { return dbUseSSL; }
+    public String getDbAuthSource() { return dbAuthSource; }
 
     public boolean isRedisEnabled() { return redisEnabled; }
     public String getRedisHost() { return redisHost; }
