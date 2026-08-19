@@ -13,13 +13,12 @@ rewards:
       pitch: 1
       message: "&cYou don't have permission for this."
     noClaimed:
-      material: SUNFLOWER
+      material: CHEST_MINECART
       data: 0
       amount: 1
-      message: "&eYou've claimed: <reward>"
+      message: "&eYou claimed your &adaily delivery&e! &a+5 &eMystery Dust received."
       name: "<status>Mystery Dust Delivery"
       lore:
-        - "&aMystery Dust Delivery"
         - "&7Your free daily 5 Mystery Dust"
         - "&7has arrived!"
         - ""
@@ -31,11 +30,7 @@ rewards:
       material: MINECART
       data: 0
       amount: 1
-      message: |-
-        &cMystery Dust Delivery
-        &7You already picked up this delivery.
-        &7Come back later!
-        &7Next Delivery: <cooldown>
+      message: "&cYou already claimed your daily delivery. Come back later! Next: &7<cooldown>"
       name: "<status>Mystery Dust Delivery"
       lore:
         - "&7You already picked up this delivery."
@@ -60,14 +55,13 @@ rewards:
       pitch: 1
       message: "&cYou don't have permission for this."
     noClaimed:
-      material: CHEST
+      material: ENDER_CHEST
       data: 0
       amount: 1
-      message: "&eYou've claimed: <reward>"
+      message: "&eYou claimed your &adefault delivery&e! &a+25 &eMystery Dust received."
       name: "<status>Mystery Dust Delivery"
       lore:
-        - "&aMystery Dust Delivery"
-        - "&7Your free monthly 5 Mystery Dust"
+        - "&7Your free monthly 25 Mystery Dust"
         - "&7for August has arrived!"
         - ""
         - "&eClick to loot!"
@@ -78,11 +72,7 @@ rewards:
       material: MINECART
       data: 0
       amount: 1
-      message: |-
-        &cMystery Dust Delivery
-        &7You already picked up this delivery.
-        &7Come back later!
-        &7Next Delivery: <cooldown>
+      message: "&cYou already claimed your default delivery. Come back later! Next: &7<cooldown>"
       name: "<status>Mystery Dust Delivery"
       lore:
         - "&7You already picked up this delivery."
@@ -107,14 +97,13 @@ rewards:
       pitch: 1
       message: "&cYou don't have permission for this."
     noClaimed:
-      material: EMERALD
+      material: ENDER_CHEST
       data: 0
       amount: 1
-      message: "&eYou've claimed: <reward>"
+      message: "&eYou claimed your &aVIP delivery&e! &a+45 &eMystery Dust received."
       name: "<status>Mystery Dust Delivery"
       lore:
-        - "&aMystery Dust Delivery"
-        - "&7Your free monthly 5 Mystery Dust"
+        - "&7Your free monthly 45 Mystery Dust"
         - "&7for August has arrived!"
         - ""
         - "&7Requires &aVIP"
@@ -127,11 +116,7 @@ rewards:
       material: MINECART
       data: 0
       amount: 1
-      message: |-
-        &cMystery Dust Delivery
-        &7You already picked up this delivery.
-        &7Come back later!
-        &7Next Delivery: <cooldown>
+      message: "&cYou already claimed your VIP delivery. Come back later! Next: &7<cooldown>"
       name: "<status>Mystery Dust Delivery"
       lore:
         - "&7You already picked up this delivery."
@@ -156,14 +141,13 @@ rewards:
       pitch: 1
       message: "&cYou don't have permission for this."
     noClaimed:
-      material: EMERALD_BLOCK
+      material: ENDER_CHEST
       data: 0
       amount: 1
-      message: "&eYou've claimed: <reward>"
+      message: "&eYou claimed your &aVIP&6+ &edelivery! &a+60 &eMystery Dust received."
       name: "<status>Mystery Dust Delivery"
       lore:
-        - "&aMystery Dust Delivery"
-        - "&7Your free monthly 5 Mystery Dust"
+        - "&7Your free monthly 60 Mystery Dust"
         - "&7for August has arrived!"
         - ""
         - "&7Requires &aVIP&6+"
@@ -176,11 +160,7 @@ rewards:
       material: MINECART
       data: 0
       amount: 1
-      message: |-
-        &cMystery Dust Delivery
-        &7You already picked up this delivery.
-        &7Come back later!
-        &7Next Delivery: <cooldown>
+      message: "&cYou already claimed your VIP+ delivery. Come back later! Next: &7<cooldown>"
       name: "<status>Mystery Dust Delivery"
       lore:
         - "&7You already picked up this delivery."
@@ -205,14 +185,13 @@ rewards:
       pitch: 1
       message: "&cYou don't have permission for this."
     noClaimed:
-      material: DIAMOND
+      material: ENDER_CHEST
       data: 0
       amount: 1
-      message: "&eYou've claimed: <reward>"
+      message: "&eYou claimed your &bMVP &edelivery! &a+80 &eMystery Dust received."
       name: "<status>Mystery Dust Delivery"
       lore:
-        - "&aMystery Dust Delivery"
-        - "&7Your free monthly 5 Mystery Dust"
+        - "&7Your free monthly 80 Mystery Dust"
         - "&7for August has arrived!"
         - ""
         - "&7Requires &bMVP"
@@ -225,11 +204,7 @@ rewards:
       material: MINECART
       data: 0
       amount: 1
-      message: |-
-        &cMystery Dust Delivery
-        &7You already picked up this delivery.
-        &7Come back later!
-        &7Next Delivery: <cooldown>
+      message: "&cYou already claimed your MVP delivery. Come back later! Next: &7<cooldown>"
       name: "<status>Mystery Dust Delivery"
       lore:
         - "&7You already picked up this delivery."
@@ -254,14 +229,13 @@ rewards:
       pitch: 1
       message: "&cYou don't have permission for this."
     noClaimed:
-      material: DIAMOND_BLOCK
+      material: ENDER_CHEST
       data: 0
       amount: 1
-      message: "&eYou've claimed: <reward>"
+      message: "&eYou claimed your &bMVP&c+ &edelivery! &a+95 &eMystery Dust received."
       name: "<status>Mystery Dust Delivery"
       lore:
-        - "&aMystery Dust Delivery"
-        - "&7Your free monthly 5 Mystery Dust"
+        - "&7Your free monthly 95 Mystery Dust"
         - "&7for August has arrived!"
         - ""
         - "&7Requires &bMVP&c+"
@@ -274,11 +248,7 @@ rewards:
       material: MINECART
       data: 0
       amount: 1
-      message: |-
-        &cMystery Dust Delivery
-        &7You already picked up this delivery.
-        &7Come back later!
-        &7Next Delivery: <cooldown>
+      message: "&cYou already claimed your MVP+ delivery. Come back later! Next: &7<cooldown>"
       name: "<status>Mystery Dust Delivery"
       lore:
         - "&7You already picked up this delivery."
@@ -293,7 +263,7 @@ rewards:
     id: "mvp++"
     slot: 24
     permission: "delivery.mvp++"
-    cooldown: 10
+    countdown: 10
     timeUnit: DAYS
     rewards:
       - "mysterydust add <player> 105"
@@ -303,14 +273,13 @@ rewards:
       pitch: 1
       message: "&cYou don't have permission for this."
     noClaimed:
-      material: NETHER_STAR
+      material: ENDER_CHEST
       data: 0
       amount: 1
-      message: "&eYou've claimed: <reward>"
+      message: "&eYou claimed your &bMVP&c++ &edelivery! &a+105 &eMystery Dust received."
       name: "<status>Mystery Dust Delivery"
       lore:
-        - "&aMystery Dust Delivery"
-        - "&7Your free monthly 5 Mystery Dust"
+        - "&7Your free monthly 105 Mystery Dust"
         - "&7for August has arrived!"
         - ""
         - "&7Requires &bMVP&c++"
@@ -323,11 +292,7 @@ rewards:
       material: MINECART
       data: 0
       amount: 1
-      message: |-
-        &cMystery Dust Delivery
-        &7You already picked up this delivery.
-        &7Come back later!
-        &7Next Delivery: <cooldown>
+      message: "&cYou already claimed your MVP++ delivery. Come back later! Next: &7<cooldown>"
       name: "<status>Mystery Dust Delivery"
       lore:
         - "&7You already picked up this delivery."
