@@ -87,6 +87,9 @@ public class Main extends JavaPlugin {
                 task.cancel();
                 task = null;
             }
+            if (rem != null) {
+                rem.clear();
+            }
             if (db != null) {
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     try {
@@ -127,6 +130,9 @@ public class Main extends JavaPlugin {
         lang.reload();
         rewardsFile.reload();
         rm.reload();
+        if (rem != null) {
+            rem.clear();
+        }
         startRewardMenuUpdater();
         getLogger().info("Configuration reloaded.");
     }
