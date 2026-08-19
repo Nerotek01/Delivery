@@ -6,6 +6,7 @@ target/
 !gradle/wrapper/gradle-wrapper.jar
 !gradlew
 !gradlew.bat
+!artifacts/*.jar
 .idea/
 *.iml
 *.ipr
