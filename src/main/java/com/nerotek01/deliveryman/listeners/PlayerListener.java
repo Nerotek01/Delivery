@@ -32,9 +32,12 @@ public class PlayerListener implements Listener {
         int rewardCount = plugin.getRm().getAvailableRewards(p, pd);
 
         String messageKey = rewardCount > 0 ? "messages.joinWithRewards" : "messages.joinNoRewards";
-        sendFormattedMessages(p, plugin.getLang().getList(messageKey),
-                "<rewards>", String.valueOf(rewardCount),
-                "<player>", p.getName());
+        String message = plugin.getLang().get(messageKey);
+        if (message == null) return;
+        String formatted = message
+                .replace("<rewards>", String.valueOf(rewardCount))
+                .replace("<player>", p.getName());
+        p.sendMessage(formatted);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -44,18 +47,5 @@ public class PlayerListener implements Listener {
 
     private void handlePlayerLeave(Player p) {
         plugin.getDb().savePlayer(p);
-        plugin.getDm().clearVoting(p.getName());
-    }
-
-    private void sendFormattedMessages(Player p, Iterable<String> messages, String... replacements) {
-        if (messages == null) return;
-        for (String line : messages) {
-            if (line == null) continue;
-            String formatted = line;
-            for (int i = 0; i + 1 < replacements.length; i += 2) {
-                formatted = formatted.replace(replacements[i], replacements[i + 1]);
-            }
-            p.sendMessage(formatted.replace("&", "\u00a7"));
-        }
     }
 }
