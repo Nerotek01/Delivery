@@ -82,13 +82,14 @@ public class Reward {
     public TimeUnit getUnit() { return unit; }
 
     public ItemStack getIcon(Player p, boolean claimed, String countdownStr) {
+        boolean canClaim = p.hasPermission(this.permission);
         if (claimed) {
             return (ItemStack) NBTEditor.set(
-                    this.claimed.getIcon("\u00a7c", countdownStr), this.id, NBT_KEY, NBT_FIELD);
+                    this.claimed.getIcon("\u00a7c", countdownStr, canClaim), this.id, NBT_KEY, NBT_FIELD);
         }
-        String color = p.hasPermission(this.permission) ? "\u00a7e" : "\u00a7c";
+        String color = canClaim ? "\u00a7e" : "\u00a7c";
         return (ItemStack) NBTEditor.set(
-                this.noClaimed.getIcon(color, ""), this.id, NBT_KEY, NBT_FIELD);
+                this.noClaimed.getIcon(color, "", canClaim), this.id, NBT_KEY, NBT_FIELD);
     }
 
     public void playSound(Player p) {

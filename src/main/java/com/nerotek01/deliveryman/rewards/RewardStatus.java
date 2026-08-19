@@ -71,10 +71,14 @@ public class RewardStatus {
     public List<String> getLore() { return lore; }
     public Sound getSound() { return sound; }
 
-    public ItemStack getIcon(String status, String countdown) {
+    public ItemStack getIcon(String status, String countdown, boolean canClaim) {
         List<String> loreWithPlaceholders = new ArrayList<>();
+        String clickText = canClaim ? "\u00a7eClick to loot!" : "\u00a7cLocked";
         for (String s : this.lore) {
-            loreWithPlaceholders.add(s.replace("<cooldown>", countdown).replace("<status>", status));
+            loreWithPlaceholders.add(s
+                    .replace("<cooldown>", countdown)
+                    .replace("<status>", status)
+                    .replace("<click>", clickText));
         }
         return new ItemUtils(XMaterial.matchDefinedXMaterial(this.material.name(), this.data)
                 .orElse(XMaterial.CHEST))
