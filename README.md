@@ -35,18 +35,23 @@ A high-performance Minecraft rewards plugin developed by Nerotek01. Provides a c
 - The menu does not close after a claim - the claimed icon immediately appears with the new cooldown.
 - Menu slot 40 contains a Barrier-block Close button named "Close" in bright red. Clicking it closes the menu.
 - Menu slot 44 contains a Written Book named "Menu Guide" with a player-facing description of the menu.
-- Item Burst Effect: when a player claims any reward, 14-20 item entities (random mix of emeralds and diamonds) burst from the player's head. The items follow the player for 5 seconds, cannot be picked up, and are removed after 5 seconds.
+- Item Burst Effect: when a player claims any reward, 16-20 item entities (random mix of emeralds and diamonds) swirl around the player's head in a tornado-like pattern for 5 seconds. Approximately 30% of the items have an enchantment glow. Items cannot be picked up and are removed after 5 seconds.
 - Reward claim plays a configurable sound (default: `ENTITY_PLAYER_LEVELUP`).
 - Join messages are single-line strings without decorative bars:
   - When rewards are available: `&aYou can collect &e<rewards> &arewards right now.`
   - When no rewards are available: `&7There are no rewards to collect right now.`
+- Menu title color is faint gray (`&7Rewards Menu`).
+- Reward icons use consistent materials: all unclaimed rank rewards use `ENDER_CHEST`, the daily reward uses `CHEST_MINECART`. When claimed, all rewards show as `MINECART` (without chest).
+- Chat messages on claim are distinct from the menu lore text and include the reward rank name and Mystery Dust amount (e.g., `&eYou claimed your &aVIP delivery&e! &a+45 &eMystery Dust received.`).
+- Chat messages on already-claimed rewards include the reward rank name and the remaining cooldown (e.g., `&cYou already claimed your VIP delivery. Come back later! Next: &7<cooldown>`).
+- Menu auto-refresh runs every 1 second (20 ticks) on the main server thread. The cooldown placeholder in the lore updates every second without reopening the menu.
 - MongoDB persistence with optional Redis cache layer (write-through):
   - On load: cache GET is performed asynchronously; cache hit returns immediately, cache miss loads from MongoDB and writes back to Redis.
   - On save: MongoDB is updated and the Redis cache is updated asynchronously.
 - Graceful degradation: if Redis is unavailable, the plugin continues to work with MongoDB only.
 - Live Redis cache reload: changing `redis.*` keys and running `/rewards reload` reconfigures the Jedis pool without restarting the server.
 - Atomic configuration reload: `ConfigManager.reload` parses all values into local variables first, then assigns them to fields only if every value parses successfully.
-- Menu disable toggle: when `rewardsMenu.enabled` is `false`, opening the menu shows the message `&cThis feature is temporarily disabled until further notice. This may only be on this server!` (red, single line).
+- Menu disable toggle: when `rewardsmenu.enabled` is `false`, opening the menu shows the message `&cThis feature is temporarily disabled until further notice. This may only be on this server!` (red, single line). When the menu is disabled, join messages are also suppressed.
 - Custom API event `DeliveryPlayerLoadEvent` fired on the main thread whenever a player's data finishes loading.
 - Thread-safe player data storage using `ConcurrentHashMap` for the player cache and the saving-flag set. A `markSaving`/`unmarkSaving` flag prevents the same player from being enqueued for save twice when `PlayerQuitEvent` is processed.
 - Atomic shutdown procedure: on disable, all online players are synchronously saved to MongoDB before connections are closed, and the in-memory player cache is cleared.
@@ -55,7 +60,7 @@ A high-performance Minecraft rewards plugin developed by Nerotek01. Provides a c
 
 | Command | Sender | Description |
 |---------|--------|-------------|
-| `/rewards` (alias `/reward`) | Player | Opens the rewards menu. If `rewardsMenu.enabled` is `false`, shows the disabled message instead. |
+| `/rewards` (alias `/reward`) | Player | Opens the rewards menu. If `rewardsmenu.enabled` is `false`, shows the disabled message instead. |
 | `/rewards reload` | Console only | Reloads `config.yml`, `lang.yml`, `rewards.yml`, the Redis pool, and the menu updater. |
 
 ### Usage Messages
@@ -82,7 +87,7 @@ Tab completion is provided for the `reload` subcommand and is restricted to cons
 ### config.yml
 
 ```yaml
-rewardsMenu:
+rewardsmenu:
   enabled: true
   rows: 5
 
@@ -140,7 +145,7 @@ Contains all translatable strings:
 - `messages.joinNoRewards` - single-line message sent on join when no rewards are available. Placeholders: `<player>`.
 - `setup.disabled` - message sent when the menu is disabled via config.
 - `countdown.days`, `countdown.hours`, `countdown.minutes`, `countdown.seconds` - countdown formats. Placeholders: `<days>`, `<hours>`, `<minutes>`, `<seconds>`.
-- `menus.rewards.title` - inventory title of the rewards menu (default: `&0Rewards Menu`).
+- `menus.rewards.title` - inventory title of the rewards menu (default: `&7Rewards Menu`).
 
 All strings support the `&` color code prefix.
 
@@ -169,7 +174,7 @@ cd Delivery
 
 On Windows, use `gradlew.bat` instead of `./gradlew`.
 
-The compiled artifact will be at `build/libs/Delivery-<version>.jar` (for example `build/libs/Delivery-3.0.0.jar`). The `-slim` jar in the same directory is the non-shaded intermediate output and is not intended for direct installation on a server.
+The compiled artifact will be at `build/libs/Delivery-<version>.jar` (for example `build/libs/Delivery-3.1.0.jar`). The `-slim` jar in the same directory is the non-shaded intermediate output and is not intended for direct installation on a server.
 
 ### Build System Details
 
