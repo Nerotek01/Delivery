@@ -1,0 +1,108 @@
+{
+  "tests": 20,
+  "passed": 20,
+  "failed": 0,
+  "skipped": 0,
+  "details": [
+    {
+      "class": "com.nerotek01.deliveryman.CountdownFormatTest",
+      "name": "zeroMillisReturnsSeconds()",
+      "status": "PASSED"
+    },
+    {
+      "class": "com.nerotek01.deliveryman.CountdownFormatTest",
+      "name": "tenDaysFormatsCorrectly()",
+      "status": "PASSED"
+    },
+    {
+      "class": "com.nerotek01.deliveryman.CountdownFormatTest",
+      "name": "twelveDaysTwelveHoursTwelveMinutesTwelveSeconds()",
+      "status": "PASSED"
+    },
+    {
+      "class": "com.nerotek01.deliveryman.CountdownFormatTest",
+      "name": "countdownFormatterHandlesNegativeInput()",
+      "status": "PASSED"
+    },
+    {
+      "class": "com.nerotek01.deliveryman.CountdownFormatTest",
+      "name": "oneDayOnlyHasDays()",
+      "status": "PASSED"
+    },
+    {
+      "class": "com.nerotek01.deliveryman.NameSanitizationTest",
+      "name": "patternBehaviorMatchesExpectation()",
+      "status": "PASSED"
+    },
+    {
+      "class": "com.nerotek01.deliveryman.NameSanitizationTest",
+      "name": "nameWithSemicolonIsStripped()",
+      "status": "PASSED"
+    },
+    {
+      "class": "com.nerotek01.deliveryman.NameSanitizationTest",
+      "name": "nullNameReturnsEmpty()",
+      "status": "PASSED"
+    },
+    {
+      "class": "com.nerotek01.deliveryman.NameSanitizationTest",
+      "name": "alphanumericNameIsPreserved()",
+      "status": "PASSED"
+    },
+    {
+      "class": "com.nerotek01.deliveryman.NameSanitizationTest",
+      "name": "nameWithSpaceIsStripped()",
+      "status": "PASSED"
+    },
+    {
+      "class": "com.nerotek01.deliveryman.NameSanitizationTest",
+      "name": "nameWithPipeIsStripped()",
+      "status": "PASSED"
+    },
+    {
+      "class": "com.nerotek01.deliveryman.NameSanitizationTest",
+      "name": "allSpecialCharNameFallsBackToOriginal()",
+      "status": "PASSED"
+    },
+    {
+      "class": "com.nerotek01.deliveryman.RankNameFormatTest",
+      "name": "vipPlusFormatIsCorrect()",
+      "status": "PASSED"
+    },
+    {
+      "class": "com.nerotek01.deliveryman.RankNameFormatTest",
+      "name": "allRanksProduceNonEmptyOutput()",
+      "status": "PASSED"
+    },
+    {
+      "class": "com.nerotek01.deliveryman.RankNameFormatTest",
+      "name": "requiresLineIncludesCorrectRank()",
+      "status": "PASSED"
+    },
+    {
+      "class": "com.nerotek01.deliveryman.RankNameFormatTest",
+      "name": "mvpPlusPlusFormatIsCorrect()",
+      "status": "PASSED"
+    },
+    {
+      "class": "com.nerotek01.deliveryman.RankNameFormatTest",
+      "name": "vipFormatIsCorrect()",
+      "status": "PASSED"
+    },
+    {
+      "class": "com.nerotek01.deliveryman.RankNameFormatTest",
+      "name": "plusRanksUseAppropriateColors()",
+      "status": "PASSED"
+    },
+    {
+      "class": "com.nerotek01.deliveryman.RankNameFormatTest",
+      "name": "mvpFormatIsCorrect()",
+      "status": "PASSED"
+    },
+    {
+      "class": "com.nerotek01.deliveryman.RankNameFormatTest",
+      "name": "mvpPlusFormatIsCorrect()",
+      "status": "PASSED"
+    }
+  ]
+}
