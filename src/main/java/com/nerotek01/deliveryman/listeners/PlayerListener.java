@@ -3,6 +3,9 @@ package com.nerotek01.deliveryman.listeners;
 import com.nerotek01.deliveryman.Main;
 import com.nerotek01.deliveryman.api.DeliveryPlayerLoadEvent;
 import com.nerotek01.deliveryman.data.PlayerData;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -40,7 +43,12 @@ public class PlayerListener implements Listener {
         String formatted = message
                 .replace("<rewards>", String.valueOf(rewardCount))
                 .replace("<player>", p.getName());
-        p.sendMessage(formatted);
+
+        TextComponent component = new TextComponent(TextComponent.fromLegacyText(formatted));
+        component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                new TextComponent[]{new TextComponent("\u00a7eClick here to open the rewards menu!")}));
+        component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rewards"));
+        p.spigot().sendMessage(component);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
