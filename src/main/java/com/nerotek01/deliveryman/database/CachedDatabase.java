@@ -31,31 +31,39 @@ public class CachedDatabase implements Database {
     @Override
     public void loadPlayer(Player p) {
         if (redis.isEnabled()) {
-            String json = redis.get(cacheKey(p));
-            if (json != null) {
-                try {
-                    PlayerData pd = gson.fromJson(json, PlayerData.class);
-                    if (pd != null) {
-                        plugin.getDm().addPlayer(p, pd);
-                        fireLoadEvent(p);
-                        plugin.getPluginLogger().debug("Cache HIT for player " + p.getName());
-                        return;
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                String json = redis.get(cacheKey(p));
+                if (json != null) {
+                    try {
+                        PlayerData pd = gson.fromJson(json, PlayerData.class);
+                        if (pd != null) {
+                            if (plugin.getDm().getPlayerData(p) == null) {
+                                plugin.getDm().addPlayer(p, pd);
+                            }
+                            fireLoadEvent(p);
+                            plugin.getPluginLogger().debug("Cache HIT for player " + p.getName());
+                            return;
+                        }
+                    } catch (Exception ex) {
+                        plugin.getPluginLogger().debug("Cache deserialize failed for " + p.getName() + ": " + ex.getMessage());
                     }
-                } catch (Exception ex) {
-                    plugin.getPluginLogger().debug("Cache deserialize failed for " + p.getName() + ": " + ex.getMessage());
                 }
-            }
-            plugin.getPluginLogger().debug("Cache MISS for player " + p.getName());
+                plugin.getPluginLogger().debug("Cache MISS for player " + p.getName());
+                delegate.loadPlayer(p);
+            });
+        } else {
+            delegate.loadPlayer(p);
         }
-        delegate.loadPlayer(p);
     }
 
     public void onBackendLoaded(Player p, PlayerData pd) {
         if (redis.isEnabled() && pd != null) {
-            try {
-                redis.set(cacheKey(p), gson.toJson(pd));
-            } catch (Exception ignored) {
+            if (plugin.getDm().getPlayerData(p) == null) {
+                plugin.getDm().addPlayer(p, pd);
+            } else {
+                plugin.getDm().addPlayer(p, pd);
             }
+            redis.setAsync(cacheKey(p), gson.toJson(pd));
         }
         fireLoadEvent(p);
     }
@@ -63,24 +71,21 @@ public class CachedDatabase implements Database {
     @Override
     public void savePlayer(Player p) {
         PlayerData pd = plugin.getDm().getPlayerData(p);
-        if (pd != null && redis.isEnabled()) {
-            try {
-                redis.set(cacheKey(p), gson.toJson(pd));
-            } catch (Exception ignored) {
-            }
+        if (pd == null) return;
+        if (!plugin.getDm().markSaving(p.getUniqueId())) {
+            return;
         }
+        final String snapshot = gson.toJson(pd);
+        redis.setAsync(cacheKey(p), snapshot);
         delegate.savePlayer(p);
     }
 
     @Override
     public void savePlayerSync(Player p) {
         PlayerData pd = plugin.getDm().getPlayerData(p);
-        if (pd != null && redis.isEnabled()) {
-            try {
-                redis.set(cacheKey(p), gson.toJson(pd));
-            } catch (Exception ignored) {
-            }
-        }
+        if (pd == null) return;
+        final String snapshot = gson.toJson(pd);
+        redis.setAsync(cacheKey(p), snapshot);
         delegate.savePlayerSync(p);
     }
 

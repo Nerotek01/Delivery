@@ -13,17 +13,34 @@ public class RedisCache {
 
     private final Main plugin;
     private final PluginLogger logger;
-    private JedisPool pool;
-    private final String prefix;
-    private final int ttlSeconds;
-    private final boolean enabled;
+    private volatile JedisPool pool;
+    private volatile String prefix;
+    private volatile int ttlSeconds;
+    private volatile boolean enabled;
 
     public RedisCache(Main plugin) {
         this.plugin = plugin;
         this.logger = plugin.getPluginLogger();
+        loadConfig();
+    }
+
+    private void loadConfig() {
         this.prefix = plugin.getConfig().getString("redis.prefix", "deliveryman:");
         this.ttlSeconds = plugin.getConfig().getInt("redis.ttl", 3600);
         this.enabled = plugin.getConfig().getBoolean("redis.enabled", false);
+    }
+
+    public void reload() {
+        boolean wasEnabled = enabled;
+        loadConfig();
+        if (enabled && !wasEnabled) {
+            connect();
+        } else if (!enabled && wasEnabled) {
+            close();
+        } else if (enabled && wasEnabled) {
+            close();
+            connect();
+        }
     }
 
     public boolean isEnabled() {
@@ -69,13 +86,45 @@ public class RedisCache {
     }
 
     public void close() {
-        if (pool != null && !pool.isClosed()) {
+        JedisPool current = pool;
+        if (current != null && !current.isClosed()) {
             try {
-                pool.close();
+                current.close();
             } catch (Exception ignored) {
             }
         }
         pool = null;
+    }
+
+    public void setAsync(String key, String value) {
+        if (!isEnabled() || key == null || value == null) return;
+        final String full = prefix + key;
+        final int ttl = ttlSeconds;
+        Runnable task = () -> {
+            try (Jedis jedis = pool.getResource()) {
+                if (ttl > 0) {
+                    jedis.setex(full, ttl, value);
+                } else {
+                    jedis.set(full, value);
+                }
+            } catch (Exception ex) {
+                logger.debug("Redis SET failed for key " + key + ": " + ex.getMessage());
+            }
+        };
+        org.bukkit.Bukkit.getScheduler().runTaskAsynchronously(plugin, task);
+    }
+
+    public void delAsync(String key) {
+        if (!isEnabled() || key == null) return;
+        final String full = prefix + key;
+        Runnable task = () -> {
+            try (Jedis jedis = pool.getResource()) {
+                jedis.del(full);
+            } catch (Exception ex) {
+                logger.debug("Redis DEL failed for key " + key + ": " + ex.getMessage());
+            }
+        };
+        org.bukkit.Bukkit.getScheduler().runTaskAsynchronously(plugin, task);
     }
 
     public String get(String key) {
