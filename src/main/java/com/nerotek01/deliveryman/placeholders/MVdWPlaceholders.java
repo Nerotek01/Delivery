@@ -33,6 +33,7 @@ public class MVdWPlaceholders {
                         Player p = (Player) getPlayer.invoke(event);
                         if (p == null) return "";
                         PlayerData pd = this.plugin.getDm().getPlayerData(p);
+                        if (pd == null) return "0";
                         return String.valueOf(this.plugin.getRm().getAvailableRewards(p, pd));
                     });
 

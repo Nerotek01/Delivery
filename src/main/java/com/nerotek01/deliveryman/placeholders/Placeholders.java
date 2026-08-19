@@ -37,6 +37,7 @@ public class Placeholders extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player p, String id) {
         if (p == null) return "";
         PlayerData pd = this.plugin.getDm().getPlayerData(p);
+        if (pd == null) return "0";
         if ("rewards".equals(id)) {
             return String.valueOf(this.plugin.getRm().getAvailableRewards(p, pd));
         }

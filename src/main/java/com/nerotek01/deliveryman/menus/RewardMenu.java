@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,8 +27,12 @@ public class RewardMenu {
         Inventory inventory = Bukkit.createInventory(null, rows * 9, title);
 
         PlayerData playerData = plugin.getDm().getPlayerData(player);
+        if (playerData == null) {
+            playerData = plugin.getDm().getOrCreatePlayerData(player);
+        }
+        final PlayerData finalPd = playerData;
         plugin.getRm().getRewards().values().forEach(reward ->
-                inventory.setItem(reward.getSlot(), createRewardIcon(player, playerData, reward)));
+                inventory.setItem(reward.getSlot(), createRewardIcon(player, finalPd, reward)));
 
         player.openInventory(inventory);
         activeViews.add(player.getUniqueId());
@@ -40,23 +43,21 @@ public class RewardMenu {
     }
 
     public void updateActiveMenus() {
-        Iterator<UUID> iterator = activeViews.iterator();
-        while (iterator.hasNext()) {
-            UUID playerId = iterator.next();
+        for (UUID playerId : activeViews) {
             Player player = Bukkit.getPlayer(playerId);
             if (player == null || !player.isOnline()) {
-                iterator.remove();
+                activeViews.remove(playerId);
                 continue;
             }
             Inventory openInventory;
             try {
                 openInventory = player.getOpenInventory().getTopInventory();
             } catch (Exception ignored) {
-                iterator.remove();
+                activeViews.remove(playerId);
                 continue;
             }
             if (openInventory == null || openInventory.getSize() == 0) {
-                iterator.remove();
+                activeViews.remove(playerId);
                 continue;
             }
             String expected = plugin.getLang().get("menus.rewards.title");
@@ -66,15 +67,19 @@ public class RewardMenu {
             } catch (Throwable ignored) {
             }
             if (expected == null || current == null || !current.equals(expected)) {
-                iterator.remove();
+                activeViews.remove(playerId);
                 continue;
             }
-            updateInventory(player, openInventory);
+            Bukkit.getScheduler().runTask(plugin, () -> updateInventory(player, openInventory));
         }
     }
 
     private void updateInventory(Player player, Inventory inventory) {
+        if (!player.isOnline()) return;
         PlayerData playerData = plugin.getDm().getPlayerData(player);
+        if (playerData == null) {
+            return;
+        }
         plugin.getRm().getRewards().values().forEach(reward ->
                 inventory.setItem(reward.getSlot(), createRewardIcon(player, playerData, reward)));
     }
