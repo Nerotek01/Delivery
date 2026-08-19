@@ -3,9 +3,11 @@ package com.nerotek01.deliveryman.utils;
 import com.nerotek01.deliveryman.Main;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
@@ -18,9 +20,8 @@ public class ItemBurstEffect {
     public ItemBurstEffect(Main plugin, Player player) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         List<Item> items = new ArrayList<>();
-        Location headLoc = player.getEyeLocation();
 
-        int count = 14 + random.nextInt(7);
+        int count = 16 + random.nextInt(5);
         for (int i = 0; i < count; i++) {
             Material mat;
             int pick = random.nextInt(3);
@@ -33,62 +34,60 @@ public class ItemBurstEffect {
             }
 
             ItemStack stack = new ItemStack(mat, 1);
-            Item item = headLoc.getWorld().dropItem(headLoc, stack);
+
+            if (random.nextInt(10) < 3) {
+                ItemMeta meta = stack.getItemMeta();
+                if (meta != null) {
+                    meta.addEnchant(Enchantment.DURABILITY, 1, true);
+                    stack.setItemMeta(meta);
+                }
+            }
+
+            Location spawnLoc = player.getEyeLocation().add(
+                    (random.nextDouble() - 0.5) * 1.5,
+                    0.5 + random.nextDouble(),
+                    (random.nextDouble() - 0.5) * 1.5
+            );
+            Item item = spawnLoc.getWorld().dropItem(spawnLoc, stack);
             item.setPickupDelay(32767);
-            item.setVelocity(new Vector(
-                    (random.nextDouble() - 0.5) * 0.9,
-                    random.nextDouble() * 0.6 + 0.3,
-                    (random.nextDouble() - 0.5) * 0.9
-            ));
             items.add(item);
         }
 
         new BukkitRunnable() {
             int ticks = 0;
+            final int totalTicks = 100;
 
             @Override
             public void run() {
-                if (ticks >= 100 || !player.isOnline()) {
+                if (ticks >= totalTicks || !player.isOnline()) {
                     for (Item item : items) {
                         if (item.isValid()) item.remove();
                     }
                     cancel();
                     return;
                 }
-                Location head = player.getEyeLocation();
-                for (Item item : items) {
-                    if (!item.isValid()) continue;
-                    Location itemLoc = item.getLocation();
-                    double dx = head.getX() - itemLoc.getX();
-                    double dy = head.getY() - itemLoc.getY();
-                    double dz = head.getZ() - itemLoc.getZ();
-                    double horizDist = Math.sqrt(dx * dx + dz * dz);
 
-                    if (horizDist > 3.5 || dy < -2.5 || dy > 3.5) {
-                        Location target = head.clone().add(
-                                (random.nextDouble() - 0.5) * 2.0,
-                                (random.nextDouble() - 0.5) * 0.8,
-                                (random.nextDouble() - 0.5) * 2.0
-                        );
-                        item.teleport(target);
-                    } else {
-                        Vector pull = new Vector(dx, dy, dz);
-                        double len = pull.length();
-                        if (len > 0.001) {
-                            pull.multiply(1.0 / len).multiply(0.04);
-                        }
-                        Vector gravity = new Vector(0, 0.04, 0);
-                        Vector jitter = new Vector(
-                                (random.nextDouble() - 0.5) * 0.05,
-                                (random.nextDouble() - 0.5) * 0.05,
-                                (random.nextDouble() - 0.5) * 0.05
-                        );
-                        Vector vel = item.getVelocity().multiply(0.92).add(pull).add(gravity).add(jitter);
-                        item.setVelocity(vel);
-                    }
+                Location playerLoc = player.getLocation();
+                double baseY = playerLoc.getY() + 2.0;
+                double angle = ticks * 0.35;
+
+                for (int i = 0; i < items.size(); i++) {
+                    Item item = items.get(i);
+                    if (!item.isValid()) continue;
+
+                    double itemAngle = angle + (i * (2 * Math.PI / items.size()));
+                    double radius = 1.5 + Math.sin(ticks * 0.1 + i) * 0.4;
+                    double y = baseY + Math.sin(ticks * 0.2 + i * 0.5) * 0.6;
+
+                    double x = playerLoc.getX() + radius * Math.cos(itemAngle);
+                    double z = playerLoc.getZ() + radius * Math.sin(itemAngle);
+
+                    Location target = new Location(playerLoc.getWorld(), x, y, z);
+                    item.teleport(target);
+                    item.setVelocity(new Vector(0, 0, 0));
                 }
                 ticks++;
             }
-        }.runTaskTimer(plugin, 5L, 1L);
+        }.runTaskTimer(plugin, 1L, 1L);
     }
 }
