@@ -33,32 +33,58 @@ public class ConfigManager {
     }
 
     public void reload() {
-        try {
-            instantUpdate = plugin.getConfig().getBoolean("rewardsMenu.instantUpdate", true);
-            right = plugin.getConfig().getBoolean("interact.right", true);
-            left = plugin.getConfig().getBoolean("interact.left", true);
-            dbType = DBType.valueOf(plugin.getConfig().getString("database.type", "MONGODB").toUpperCase());
-            rewardsRows = Math.max(1, Math.min(6, plugin.getConfig().getInt("rewardsMenu.rows", 5)));
-            port = plugin.getConfig().getInt("database.port", 27017);
-            ip = plugin.getConfig().getString("database.host", "127.0.0.1");
-            database = plugin.getConfig().getString("database.database", "DeliveryMan");
-            username = plugin.getConfig().getString("database.username", "");
-            password = plugin.getConfig().getString("database.password", "");
-            useSSL = plugin.getConfig().getBoolean("database.useSSL", false);
-            authSource = plugin.getConfig().getString("database.authSource", "admin");
+        boolean newInstantUpdate = plugin.getConfig().getBoolean("rewardsMenu.instantUpdate", true);
+        boolean newRight = plugin.getConfig().getBoolean("interact.right", true);
+        boolean newLeft = plugin.getConfig().getBoolean("interact.left", true);
 
-            redisEnabled = plugin.getConfig().getBoolean("redis.enabled", false);
-            redisHost = plugin.getConfig().getString("redis.host", "127.0.0.1");
-            redisPort = plugin.getConfig().getInt("redis.port", 6379);
-            redisPassword = plugin.getConfig().getString("redis.password", "");
-            redisDatabase = plugin.getConfig().getInt("redis.database", 0);
-            redisTimeout = plugin.getConfig().getInt("redis.timeout", 5000);
-            redisPrefix = plugin.getConfig().getString("redis.prefix", "deliveryman:");
-            redisTtl = plugin.getConfig().getInt("redis.ttl", 3600);
+        DBType newDbType;
+        String rawType = plugin.getConfig().getString("database.type", "MONGODB");
+        try {
+            newDbType = DBType.valueOf(rawType.toUpperCase());
         } catch (IllegalArgumentException ex) {
-            plugin.getLogger().severe("Invalid config value: " + ex.getMessage());
-            throw ex;
+            plugin.getLogger().warning("Invalid database.type '" + rawType + "' - defaulting to MONGODB.");
+            newDbType = DBType.MONGODB;
         }
+
+        int newRewardsRows = Math.max(1, Math.min(6, plugin.getConfig().getInt("rewardsMenu.rows", 5)));
+        int newPort = plugin.getConfig().getInt("database.port", 27017);
+        String newIp = plugin.getConfig().getString("database.host", "127.0.0.1");
+        String newDatabase = plugin.getConfig().getString("database.database", "DeliveryMan");
+        String newUsername = plugin.getConfig().getString("database.username", "");
+        String newPassword = plugin.getConfig().getString("database.password", "");
+        boolean newUseSSL = plugin.getConfig().getBoolean("database.useSSL", false);
+        String newAuthSource = plugin.getConfig().getString("database.authSource", "admin");
+
+        boolean newRedisEnabled = plugin.getConfig().getBoolean("redis.enabled", false);
+        String newRedisHost = plugin.getConfig().getString("redis.host", "127.0.0.1");
+        int newRedisPort = plugin.getConfig().getInt("redis.port", 6379);
+        String newRedisPassword = plugin.getConfig().getString("redis.password", "");
+        int newRedisDatabase = plugin.getConfig().getInt("redis.database", 0);
+        int newRedisTimeout = plugin.getConfig().getInt("redis.timeout", 5000);
+        String newRedisPrefix = plugin.getConfig().getString("redis.prefix", "deliveryman:");
+        int newRedisTtl = plugin.getConfig().getInt("redis.ttl", 3600);
+
+        this.instantUpdate = newInstantUpdate;
+        this.right = newRight;
+        this.left = newLeft;
+        this.dbType = newDbType;
+        this.rewardsRows = newRewardsRows;
+        this.port = newPort;
+        this.ip = newIp;
+        this.database = newDatabase;
+        this.username = newUsername;
+        this.password = newPassword;
+        this.useSSL = newUseSSL;
+        this.authSource = newAuthSource;
+
+        this.redisEnabled = newRedisEnabled;
+        this.redisHost = newRedisHost;
+        this.redisPort = newRedisPort;
+        this.redisPassword = newRedisPassword;
+        this.redisDatabase = newRedisDatabase;
+        this.redisTimeout = newRedisTimeout;
+        this.redisPrefix = newRedisPrefix;
+        this.redisTtl = newRedisTtl;
     }
 
     public int getRewardsRows() { return rewardsRows; }
