@@ -43,6 +43,22 @@ dependencies {
 
     compileOnly 'me.clip:placeholderapi:2.11.6'
     compileOnly 'com.github.NuVotifier:NuVotifier:2.7.2'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        showStandardStreams = true
+    }
+    reports {
+        junitXml.required = true
+        html.required = true
+    }
 }
 
 processResources {
