@@ -16,6 +16,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -50,7 +51,13 @@ public class MenuListener implements Listener {
     @EventHandler
     public void onOpen(InventoryOpenEvent e) {
         if (!(e.getPlayer() instanceof Player)) return;
-        if (!isRewardMenu(e.getInventory())) return;
+        String viewTitle;
+        try {
+            viewTitle = e.getView().getTitle();
+        } catch (Throwable ignored) {
+            return;
+        }
+        if (!isRewardMenu(viewTitle, e.getInventory())) return;
         plugin.getRem().add((Player) e.getPlayer());
     }
 
@@ -58,12 +65,14 @@ public class MenuListener implements Listener {
     public void onMenu(InventoryClickEvent e) {
         if (!(e.getWhoClicked() instanceof Player)) return;
         Inventory topInventory;
+        String viewTitle;
         try {
             topInventory = e.getView().getTopInventory();
+            viewTitle = e.getView().getTitle();
         } catch (Throwable ignored) {
             return;
         }
-        if (topInventory == null || !isRewardMenu(topInventory)) return;
+        if (topInventory == null || !isRewardMenu(viewTitle, topInventory)) return;
 
         e.setCancelled(true);
         Player p = (Player) e.getWhoClicked();
@@ -100,6 +109,13 @@ public class MenuListener implements Listener {
         handleRewardClick(p, pd, reward);
     }
 
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        UUID uuid = e.getPlayer().getUniqueId();
+        lastClickTime.remove(uuid);
+        lastSpamMessageTime.remove(uuid);
+    }
+
     private boolean isClickCooldownActive(Player p) {
         UUID uuid = p.getUniqueId();
         long now = System.currentTimeMillis();
@@ -121,11 +137,12 @@ public class MenuListener implements Listener {
         }
     }
 
-    private boolean isRewardMenu(Inventory inventory) {
-        if (inventory == null) return false;
-        int size = inventory.getSize();
+    private boolean isRewardMenu(String viewTitle, Inventory inventory) {
+        if (inventory == null || viewTitle == null) return false;
+        String expectedTitle = plugin.getLang().get("menus.rewards.title");
+        if (expectedTitle == null || !expectedTitle.equals(viewTitle)) return false;
         int expectedSize = plugin.getCm().getRewardsRows() * 9;
-        return size == expectedSize;
+        return inventory.getSize() == expectedSize;
     }
 
     private void handleRewardClick(Player p, PlayerData pd, Reward reward) {
