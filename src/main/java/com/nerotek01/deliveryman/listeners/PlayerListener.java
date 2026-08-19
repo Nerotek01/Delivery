@@ -8,7 +8,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerListener implements Listener {
@@ -27,6 +26,9 @@ public class PlayerListener implements Listener {
     public void onLoad(DeliveryPlayerLoadEvent e) {
         Player p = e.getPlayer();
         PlayerData pd = plugin.getDm().getPlayerData(p);
+        if (pd == null) {
+            return;
+        }
         int rewardCount = plugin.getRm().getAvailableRewards(p, pd);
 
         String messageKey = rewardCount > 0 ? "messages.joinWithRewards" : "messages.joinNoRewards";
@@ -40,13 +42,9 @@ public class PlayerListener implements Listener {
         handlePlayerLeave(e.getPlayer());
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onKick(PlayerKickEvent e) {
-        handlePlayerLeave(e.getPlayer());
-    }
-
     private void handlePlayerLeave(Player p) {
         plugin.getDb().savePlayer(p);
+        plugin.getDm().clearVoting(p.getName());
     }
 
     private void sendFormattedMessages(Player p, Iterable<String> messages, String... replacements) {
