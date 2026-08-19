@@ -119,6 +119,9 @@ public class Main extends JavaPlugin {
                         }
                     }
                 }
+                if (dm != null) {
+                    dm.clearAll();
+                }
                 try {
                     db.close();
                 } catch (Exception ex) {
@@ -144,6 +147,12 @@ public class Main extends JavaPlugin {
             pluginLogger.setDebug(debugMode);
             pluginLogger.setLevel(LogLevel.fromString(getConfig().getString("logLevel", "INFO"), LogLevel.INFO));
         }
+        if (cm != null) {
+            cm.reload();
+        }
+        if (redis != null) {
+            redis.reload();
+        }
         lang.reload();
         rewards.reload();
         rm.reload();
@@ -154,7 +163,7 @@ public class Main extends JavaPlugin {
 
     private void startRewardMenuUpdater() {
         if (cm.isInstantUpdate()) {
-            task = Bukkit.getScheduler().runTaskTimerAsynchronously(this, rem::updateRewardMenu, 20L, 20L);
+            task = Bukkit.getScheduler().runTaskTimer(this, rem::updateRewardMenu, 20L, 20L);
         }
     }
 

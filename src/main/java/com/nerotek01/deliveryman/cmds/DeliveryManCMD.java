@@ -59,8 +59,13 @@ public class DeliveryManCMD implements CommandExecutor, TabCompleter {
             sender.sendMessage(plugin.getLang().get("setup.noPermission"));
             return true;
         }
-        plugin.reload();
-        sender.sendMessage(plugin.getLang().get("setup.reload"));
+        try {
+            plugin.reload();
+            sender.sendMessage(plugin.getLang().get("setup.reload"));
+        } catch (Throwable ex) {
+            plugin.getPluginLogger().severe("Reload failed", ex);
+            sender.sendMessage("\u00a7cReload failed: " + ex.getMessage());
+        }
         return true;
     }
 
