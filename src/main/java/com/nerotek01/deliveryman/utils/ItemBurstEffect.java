@@ -89,7 +89,9 @@ public class ItemBurstEffect {
                     if (queue != null) {
                         Runnable next = queue.poll();
                         if (next != null) {
-                            next.run();
+                            if (player.isOnline()) {
+                                next.run();
+                            }
                         } else {
                             queues.remove(uuid);
                         }
