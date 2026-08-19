@@ -1,0 +1,54 @@
+Delivery-Man-Plugin v2.3.0 - Source Backup & Update Notes
+==========================================================
+
+Backup Created: 2026-08-19
+Branch: main
+Backup Type: Pre-v3.0.0 baseline (major rewrite)
+
+State of v2.3.0
+-----------------
+- Build system: Gradle 8.10.2 with com.gradleup.shadow 8.3.0
+- Java target: 21
+- Backend support: MongoDB, MySQL (HikariCP), SQLite
+- Cache layer: Optional Redis via CachedDatabase (write-through)
+- Addons: Votifier, PlaceholderAPI, MVdWPlaceholderAPI
+- Custom event: DeliveryPlayerLoadEvent
+- Custom logger: PluginLogger with LogLevel
+- Commands: /deliveryman menu, /deliveryman reload (alias /udm)
+- 15 audit issues resolved (issues #1 - #15)
+
+Scheduled Breaking Changes for v3.0.0
+---------------------------------------
+1. Database backend reduced to MongoDB only (with optional Redis cache).
+   MySQL and SQLite backends removed entirely.
+2. All three addons removed: Votifier, PlaceholderAPI, MVdWPlaceholderAPI.
+3. PluginLogger / LogLevel / debugMode / logLevel removed.
+   Use the standard Bukkit logger (plugin.getLogger()) instead.
+4. Config file reduced to two top-level sections: rewardsMenu and database
+   (Mongo settings) plus redis. Removed: addons, interact, debugMode, logLevel.
+5. Reward menu title color changed to dark black (&0).
+6. Reload command restricted to console only.
+7. Commands /deliveryman and /udm removed. New command /rewards (alias /reward)
+   opens the menu. A single one-line red usage message is shown on misuse.
+8. Join messages reduced to single-line strings without decorative bars.
+9. Menu slot 40 gets a Barrier-block "Close" button (bright red name).
+   Menu slot 44 gets a written-book "Menu Guide" with a player-facing
+   description of the menu.
+10. RewardType.MESSAGE and RewardType.VOTE removed. Only NORMAL rewards remain.
+11. After a claim the menu no longer closes. The cooldown placeholder in the
+    icon lore refreshes every second via the always-on sync refresh task.
+12. Rewards renamed to daily / default / vip / vip+ / mvp / mvp+ / mvp++.
+    All rank rewards use a 10-day cooldown. Daily reward uses 1-day cooldown.
+13. Claiming a reward spawns an ItemBurstEffect: random emerald / diamond
+    items burst from the player's head, follow the player for 5 seconds,
+    cannot be picked up, and are removed after 5 seconds.
+14. Plugin name renamed to "Delivery" (plugin.yml, artifact name).
+    GitHub repository also targeted for rename to "Delivery".
+15. New config toggle rewardsMenu.enabled - when false, opening the menu
+    shows the message: "This feature is temporarily disabled until further
+    notice. This may only be on this server!" (red, single line).
+
+Action
+------
+This backup preserves the exact v2.3.0 source tree so the v3.0.0 rewrite
+can be rolled back if needed.
