@@ -76,11 +76,11 @@ public class MongoDBDatabase implements Database {
                     if (pd == null) {
                         pd = new PlayerData(uuid);
                     }
-                    plugin.getDm().addPlayer(p, pd);
                 } else {
                     pd = new PlayerData(uuid);
                     createNewPlayer(p, pd);
                 }
+                plugin.getDm().addPlayer(p, pd);
                 final PlayerData loaded = pd;
                 if (plugin.getDb() instanceof CachedDatabase) {
                     ((CachedDatabase) plugin.getDb()).onBackendLoaded(p, loaded);
@@ -99,13 +99,15 @@ public class MongoDBDatabase implements Database {
                 .append("name", p.getName())
                 .append("data", plugin.getGson().toJson(pd));
         collection.insertOne(doc);
-        plugin.getDm().addPlayer(p, pd);
     }
 
     @Override
     public void savePlayer(final Player p) {
         final PlayerData pd = plugin.getDm().getPlayerData(p);
         if (pd == null) return;
+        if (!plugin.getDm().markSaving(p.getUniqueId())) {
+            return;
+        }
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 Document query = new Document("_id", p.getUniqueId().toString());
@@ -116,7 +118,7 @@ public class MongoDBDatabase implements Database {
             } catch (Exception ex) {
                 plugin.getPluginLogger().warning("Failed to save player data for " + p.getName(), ex);
             } finally {
-                plugin.getDm().removePlayer(p);
+                plugin.getDm().unmarkSaving(p.getUniqueId());
             }
         });
     }
@@ -133,8 +135,6 @@ public class MongoDBDatabase implements Database {
             collection.updateOne(query, update, new UpdateOptions().upsert(true));
         } catch (Exception ex) {
             plugin.getPluginLogger().warning("Failed to save player data (sync) for " + p.getName(), ex);
-        } finally {
-            plugin.getDm().removePlayer(p);
         }
     }
 
