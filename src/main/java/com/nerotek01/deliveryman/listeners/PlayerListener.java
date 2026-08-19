@@ -25,6 +25,9 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onLoad(DeliveryPlayerLoadEvent e) {
         Player p = e.getPlayer();
+        if (!plugin.getCm().isMenuEnabled()) {
+            return;
+        }
         PlayerData pd = plugin.getDm().getPlayerData(p);
         if (pd == null) {
             return;

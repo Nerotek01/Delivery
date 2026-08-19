@@ -11,4 +11,4 @@ countdown:
   seconds: "<seconds>s"
 menus:
   rewards:
-    title: "&0Rewards Menu"
+    title: "&7Rewards Menu"

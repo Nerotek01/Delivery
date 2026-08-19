@@ -30,8 +30,8 @@ public class ConfigManager {
     }
 
     public void reload() {
-        boolean newMenuEnabled = plugin.getConfig().getBoolean("rewardsMenu.enabled", true);
-        int newRewardsRows = Math.max(5, Math.min(6, plugin.getConfig().getInt("rewardsMenu.rows", 5)));
+        boolean newMenuEnabled = plugin.getConfig().getBoolean("rewardsmenu.enabled", true);
+        int newRewardsRows = Math.max(5, Math.min(6, plugin.getConfig().getInt("rewardsmenu.rows", 5)));
 
         String newDbHost = plugin.getConfig().getString("database.host", "127.0.0.1");
         int newDbPort = plugin.getConfig().getInt("database.port", 27017);
