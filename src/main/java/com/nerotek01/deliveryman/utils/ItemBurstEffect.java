@@ -13,11 +13,32 @@ import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ItemBurstEffect {
 
-    public ItemBurstEffect(Main plugin, Player player) {
+    private static final Map<UUID, ConcurrentLinkedDeque<Runnable>> queues = new ConcurrentHashMap<>();
+    private static final Set<UUID> active = ConcurrentHashMap.newKeySet();
+
+    public static void play(Main plugin, Player player) {
+        UUID uuid = player.getUniqueId();
+        if (active.contains(uuid)) {
+            queues.computeIfAbsent(uuid, k -> new ConcurrentLinkedDeque<>())
+                    .add(() -> startAnimation(plugin, player));
+            return;
+        }
+        startAnimation(plugin, player);
+    }
+
+    private static void startAnimation(Main plugin, Player player) {
+        UUID uuid = player.getUniqueId();
+        active.add(uuid);
+
         ThreadLocalRandom random = ThreadLocalRandom.current();
         List<Item> items = new ArrayList<>();
 
@@ -62,6 +83,16 @@ public class ItemBurstEffect {
                 if (ticks >= totalTicks || !player.isOnline()) {
                     for (Item item : items) {
                         if (item.isValid()) item.remove();
+                    }
+                    active.remove(uuid);
+                    ConcurrentLinkedDeque<Runnable> queue = queues.get(uuid);
+                    if (queue != null) {
+                        Runnable next = queue.poll();
+                        if (next != null) {
+                            next.run();
+                        } else {
+                            queues.remove(uuid);
+                        }
                     }
                     cancel();
                     return;
