@@ -1,12 +1,12 @@
 {
-  "version": "3.0.0",
-  "generatedAt": "2026-08-19T10:16:00Z",
+  "version": "3.1.0",
+  "generatedAt": "2026-08-19T10:58:00Z",
   "buildTool": "Gradle 8.10.2 (com.gradleup.shadow 8.3.0)",
   "javaTarget": "21",
   "testFramework": "JUnit 5 (Jupiter 5.10.2)",
   "summary": {
-    "total": 20,
-    "passed": 20,
+    "total": 19,
+    "passed": 19,
     "failed": 0,
     "skipped": 0,
     "errors": 0
@@ -17,7 +17,7 @@
       "tests": 7,
       "passed": 7,
       "failed": 0,
-      "covers": "Player name sanitization in console command substitution - prevents command injection"
+      "covers": "Player name sanitization in console command substitution"
     },
     {
       "name": "com.nerotek01.deliveryman.RankNameFormatTest",
@@ -31,7 +31,7 @@
       "tests": 5,
       "passed": 5,
       "failed": 0,
-      "covers": "Cooldown countdown format: 10-day cooldown display in lore"
+      "covers": "10-day cooldown countdown format"
     }
   ],
   "result": "ALL TESTS PASSED - RELEASE APPROVED"
