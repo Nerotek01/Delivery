@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -52,25 +53,44 @@ public class RewardMenu {
         updateActiveMenus();
     }
 
+    public void clear() {
+        activeViews.clear();
+    }
+
     public void updateActiveMenus() {
+        String expectedTitle = plugin.getLang().get("menus.rewards.title");
+        int expectedSize = plugin.getCm().getRewardsRows() * 9;
+
         for (UUID playerId : activeViews) {
             Player player = Bukkit.getPlayer(playerId);
             if (player == null || !player.isOnline()) {
                 activeViews.remove(playerId);
                 continue;
             }
-            Inventory openInventory;
+            InventoryView openView;
             try {
-                openInventory = player.getOpenInventory().getTopInventory();
+                openView = player.getOpenInventory();
             } catch (Exception ignored) {
                 activeViews.remove(playerId);
                 continue;
             }
-            if (openInventory == null || openInventory.getSize() == 0) {
+            Inventory topInventory = openView.getTopInventory();
+            if (topInventory == null || topInventory.getSize() != expectedSize) {
                 activeViews.remove(playerId);
                 continue;
             }
-            updateInventory(player, openInventory);
+            String viewTitle;
+            try {
+                viewTitle = openView.getTitle();
+            } catch (Exception ignored) {
+                activeViews.remove(playerId);
+                continue;
+            }
+            if (viewTitle == null || !viewTitle.equals(expectedTitle)) {
+                activeViews.remove(playerId);
+                continue;
+            }
+            updateInventory(player, topInventory);
         }
     }
 
