@@ -19,7 +19,7 @@ A high-performance Minecraft rewards plugin developed by Nerotek01. Provides a c
 
 ## Features
 
-- Configurable rewards menu with adjustable row count (5 or 6 rows). The menu title color is dark black.
+- Configurable rewards menu with adjustable row count (5 or 6 rows, default 6). The menu title color is faint gray.
 - Seven rank-based Mystery Dust rewards with a 10-day cooldown (daily reward uses a 1-day cooldown):
   - `daily` - 5 Mystery Dust, every 1 day, available to everyone.
   - `default` - 25 Mystery Dust, every 10 days, available to everyone.
@@ -29,15 +29,15 @@ A high-performance Minecraft rewards plugin developed by Nerotek01. Provides a c
   - `mvp+` - 95 Mystery Dust, every 10 days, requires `delivery.mvp+`.
   - `mvp++` - 105 Mystery Dust, every 10 days, requires `delivery.mvp++`.
 - Cooldown system with configurable time units and human-readable countdown formatting in the menu lore (e.g., `10d 12h 30m 5s`).
-- Per-reward permission gating with a custom no-permission message, sound, volume, and pitch.
+- Per-reward permission gating with a custom no-permission message, sound, volume, and pitch. When a player lacks permission, the lore's `<click>` placeholder shows red "Locked" text instead of the yellow "Click to loot!".
 - Console command execution on claim with `<player>` placeholder substitution. Player names are sanitized to `[A-Za-z0-9_]` before substitution to prevent command injection.
 - Menu auto-refresh every second on the main server thread. After a claim, the cooldown placeholder in the lore refreshes every second without reopening the menu.
 - The menu does not close after a claim - the claimed icon immediately appears with the new cooldown.
-- Menu slot 40 contains a Barrier-block Close button named "Close" in bright red. Clicking it closes the menu.
-- Menu slot 44 contains a Written Book named "Menu Guide" with a player-facing description of the menu.
-- Item Burst Effect: when a player claims any reward, 16-20 item entities (random mix of emeralds and diamonds) swirl around the player's head in a tornado-like pattern for 5 seconds. Approximately 30% of the items have an enchantment glow. Items cannot be picked up and are removed after 5 seconds.
+- Menu slot 49 contains a Barrier-block Close button named "Close" in bright red. Clicking it closes the menu.
+- Menu slot 53 contains a Written Book named "Menu Guide" with a player-facing description of the menu.
+- Item Burst Effect: when a player claims any reward, 16-20 item entities (random mix of emeralds and diamonds) swirl around the player's head in a tornado-like pattern for 5 seconds. Approximately 30% of the items have an enchantment glow. Items cannot be picked up and are removed after 5 seconds. If a player claims a second reward while the first animation is still playing, the second animation is queued and plays after the first one finishes.
 - Reward claim plays a configurable sound (default: `ENTITY_PLAYER_LEVELUP`).
-- Join messages are single-line strings without decorative bars:
+- Join messages are single-line strings without decorative bars. The message is hoverable (shows "Click here to open the rewards menu!") and clickable (runs `/rewards`):
   - When rewards are available: `&aYou can collect &e<rewards> &arewards right now.`
   - When no rewards are available: `&7There are no rewards to collect right now.`
 - Menu title color is faint gray (`&7Rewards Menu`).
@@ -45,6 +45,9 @@ A high-performance Minecraft rewards plugin developed by Nerotek01. Provides a c
 - Chat messages on claim are distinct from the menu lore text and include the reward rank name and Mystery Dust amount (e.g., `&eYou claimed your &aVIP delivery&e! &a+45 &eMystery Dust received.`).
 - Chat messages on already-claimed rewards include the reward rank name and the remaining cooldown (e.g., `&cYou already claimed your VIP delivery. Come back later! Next: &7<cooldown>`).
 - Menu auto-refresh runs every 1 second (20 ticks) on the main server thread. The cooldown placeholder in the lore updates every second without reopening the menu.
+- Click cooldown: 500ms per click. Spam-clicking shows a single red English message ("You are clicking too fast! Please slow down.") throttled to once every 2 seconds.
+- Daily reward has unique lore text clearly indicating it is a daily reward claimable every day.
+- The menu layout uses 6 rows (54 slots). Reward slots: daily=13, default=20, vip=21, vip+=22, mvp=23, mvp+=24, mvp++=29. Close button at slot 49, Info book at slot 53.
 - MongoDB persistence with optional Redis cache layer (write-through):
   - On load: cache GET is performed asynchronously; cache hit returns immediately, cache miss loads from MongoDB and writes back to Redis.
   - On save: MongoDB is updated and the Redis cache is updated asynchronously.
@@ -89,7 +92,7 @@ Tab completion is provided for the `reload` subcommand and is restricted to cons
 ```yaml
 rewardsmenu:
   enabled: true
-  rows: 5
+  rows: 6
 
 database:
   host: 127.0.0.1
@@ -174,7 +177,7 @@ cd Delivery
 
 On Windows, use `gradlew.bat` instead of `./gradlew`.
 
-The compiled artifact will be at `build/libs/Delivery-<version>.jar` (for example `build/libs/Delivery-3.1.0.jar`). The `-slim` jar in the same directory is the non-shaded intermediate output and is not intended for direct installation on a server.
+The compiled artifact will be at `build/libs/Delivery-<version>.jar` (for example `build/libs/Delivery-3.2.0.jar`). The `-slim` jar in the same directory is the non-shaded intermediate output and is not intended for direct installation on a server.
 
 ### Build System Details
 

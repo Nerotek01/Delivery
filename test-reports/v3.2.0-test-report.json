@@ -1,6 +1,6 @@
 {
-  "version": "3.1.0",
-  "generatedAt": "2026-08-19T10:58:00Z",
+  "version": "3.2.0",
+  "generatedAt": "2026-08-19T11:22:00Z",
   "buildTool": "Gradle 8.10.2 (com.gradleup.shadow 8.3.0)",
   "javaTarget": "21",
   "testFramework": "JUnit 5 (Jupiter 5.10.2)",
