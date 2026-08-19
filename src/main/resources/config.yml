@@ -1,25 +1,11 @@
-debugMode: false
-
-logLevel: INFO
-
-addons:
-  Votifier: false
-  PlaceholderAPI: false
-  MVdWPlaceholderAPI: false
-
-interact:
-  right: true
-  left: true
-
 rewardsMenu:
-  instantUpdate: true
+  enabled: true
   rows: 5
 
 database:
-  type: MONGODB
   host: 127.0.0.1
   port: 27017
-  database: DeliveryMan
+  database: Delivery
   username: ""
   password: ""
   useSSL: false
@@ -32,5 +18,5 @@ redis:
   password: ""
   database: 0
   timeout: 5000
-  prefix: "deliveryman:"
+  prefix: "delivery:"
   ttl: 3600

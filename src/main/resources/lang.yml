@@ -1,24 +1,14 @@
 messages:
-  joinWithRewards:
-    - "&7&m---------------------------------------------"
-    - "&7"
-    - "&aHello &e<player> &ayou have &e<rewards> &arewards to collect."
-    - "&7"
-    - "&7&m---------------------------------------------"
-  joinNoRewards:
-    - "&7&m---------------------------------------------"
-    - "&7"
-    - "&aHello &e<player> &ayou have no rewards for collecting."
-    - "&7"
-    - "&7&m---------------------------------------------"
+  joinWithRewards: "&aYou can collect &e<rewards> &arewards right now."
+  joinNoRewards: "&7There are no rewards to collect right now."
 setup:
   noPermission: "&cYou don't have permission for this."
-  reload: "&aAll configuration has been reloaded."
+  disabled: "&cThis feature is temporarily disabled until further notice. This may only be on this server!"
 countdown:
-  days: "&7<days>d, <hours>h, <minutes>m, <seconds>s"
-  hours: "&7<hours>h, <minutes>m, <seconds>s"
-  minutes: "&7<minutes>m, <seconds>s"
-  seconds: "&7<seconds>s"
+  days: "<days>d <hours>h <minutes>m <seconds>s"
+  hours: "<hours>h <minutes>m <seconds>s"
+  minutes: "<minutes>m <seconds>s"
+  seconds: "<seconds>s"
 menus:
   rewards:
-    title: "&aRewards Menu"
+    title: "&0Rewards Menu"
