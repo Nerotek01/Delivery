@@ -1,0 +1,36 @@
+Delivery v3.1.0 - Source Backup & Update Notes
+================================================
+
+Backup Created: 2026-08-19
+Branch: main
+Backup Type: Pre-v3.2.0 baseline (UX improvements)
+
+State of v3.1.0
+-----------------
+- Plugin name: Delivery
+- Backend: MongoDB + optional Redis
+- 7 rank-based rewards
+- ItemBurstEffect tornado swirl
+- Menu refresh every 1 second
+
+Scheduled Changes for v3.2.0
+------------------------------
+1. No-permission lore: replace "Click to loot!" with red "Locked" text
+   when player lacks permission, using a <click> placeholder.
+2. Fix cooldown placeholder 1-second refresh by simplifying
+   updateActiveMenus (remove title comparison that may fail).
+3. Add 500ms click cooldown per player. Spam-clicking shows a single
+   red English message (throttled to 2 seconds between messages).
+4. Join message made hoverable and clickable to run /rewards.
+5. Daily reward text made unique: clearly states it's a daily reward
+   claimable every day.
+6. Menu expanded to 6 rows (54 slots). mvp++ moved 5 slots forward
+   (24 -> 29). Other rank rewards moved 1 slot forward. Close button
+   at slot 49, Info book at slot 53.
+7. ItemBurstEffect queued per player: if a player claims a second
+   reward while the first animation is still playing, the second
+   animation waits in a queue and plays after the first finishes.
+
+Action
+------
+This backup preserves the exact v3.1.0 source tree for rollback safety.
