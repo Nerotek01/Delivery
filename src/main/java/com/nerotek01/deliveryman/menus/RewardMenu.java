@@ -18,8 +18,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RewardMenu {
-    public static final int CLOSE_SLOT = 40;
-    public static final int INFO_SLOT = 44;
+    public static final int CLOSE_SLOT = 49;
+    public static final int INFO_SLOT = 53;
 
     private final Main plugin;
     private final Set<UUID> activeViews = ConcurrentHashMap.newKeySet();
@@ -67,16 +67,6 @@ public class RewardMenu {
                 continue;
             }
             if (openInventory == null || openInventory.getSize() == 0) {
-                activeViews.remove(playerId);
-                continue;
-            }
-            String expected = plugin.getLang().get("menus.rewards.title");
-            String current = null;
-            try {
-                current = player.getOpenInventory().getTitle();
-            } catch (Throwable ignored) {
-            }
-            if (expected == null || current == null || !current.equals(expected)) {
                 activeViews.remove(playerId);
                 continue;
             }

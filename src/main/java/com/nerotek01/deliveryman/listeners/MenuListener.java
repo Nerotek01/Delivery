@@ -19,14 +19,22 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 public class MenuListener implements Listener {
     private static final String NBT_KEY = "ULTRADM";
     private static final String NBT_FIELD = "ID";
     private static final Pattern SAFE_NAME = Pattern.compile("[^A-Za-z0-9_]");
+    private static final long CLICK_COOLDOWN_MS = 500L;
+    private static final long SPAM_MESSAGE_COOLDOWN_MS = 2000L;
+    private static final String SPAM_MESSAGE = "\u00a7cYou are clicking too fast! Please slow down.";
 
     private final Main plugin;
+    private final Map<UUID, Long> lastClickTime = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> lastSpamMessageTime = new ConcurrentHashMap<>();
 
     public MenuListener(Main plugin) {
         this.plugin = plugin;
@@ -71,6 +79,11 @@ public class MenuListener implements Listener {
             return;
         }
 
+        if (isClickCooldownActive(p)) {
+            sendSpamMessage(p);
+            return;
+        }
+
         ItemStack item = e.getCurrentItem();
         if (item == null || item.getType() == Material.AIR) return;
 
@@ -87,20 +100,32 @@ public class MenuListener implements Listener {
         handleRewardClick(p, pd, reward);
     }
 
+    private boolean isClickCooldownActive(Player p) {
+        UUID uuid = p.getUniqueId();
+        long now = System.currentTimeMillis();
+        Long last = lastClickTime.get(uuid);
+        if (last != null && (now - last) < CLICK_COOLDOWN_MS) {
+            return true;
+        }
+        lastClickTime.put(uuid, now);
+        return false;
+    }
+
+    private void sendSpamMessage(Player p) {
+        UUID uuid = p.getUniqueId();
+        long now = System.currentTimeMillis();
+        Long lastMsg = lastSpamMessageTime.get(uuid);
+        if (lastMsg == null || (now - lastMsg) >= SPAM_MESSAGE_COOLDOWN_MS) {
+            p.sendMessage(SPAM_MESSAGE);
+            lastSpamMessageTime.put(uuid, now);
+        }
+    }
+
     private boolean isRewardMenu(Inventory inventory) {
         if (inventory == null) return false;
         int size = inventory.getSize();
         int expectedSize = plugin.getCm().getRewardsRows() * 9;
-        if (size != expectedSize) return false;
-        String expected = plugin.getLang().get("menus.rewards.title");
-        if (expected == null) return false;
-        String title;
-        try {
-            title = inventory.getTitle();
-        } catch (Throwable ignored) {
-            return false;
-        }
-        return expected.equals(title);
+        return size == expectedSize;
     }
 
     private void handleRewardClick(Player p, PlayerData pd, Reward reward) {
@@ -134,7 +159,7 @@ public class MenuListener implements Listener {
     }
 
     private void claimReward(Player p, PlayerData pd, Reward reward) {
-        new ItemBurstEffect(plugin, p);
+        ItemBurstEffect.play(plugin, p);
 
         String message = reward.getNoClaimed().getMessage();
         if (message != null) {
