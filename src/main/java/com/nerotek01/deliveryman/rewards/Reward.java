@@ -46,9 +46,12 @@ public class Reward {
         this.noPermissionMessage = plugin.getRewards().getOrDefault(path + ".noPermission.message",
                 "&cYou don't have permission for this.");
 
-        try {
-            this.countdown = plugin.getRewards().getInt(path + ".countdown");
-        } catch (Exception ignored) {
+        if (plugin.getRewards().isSet(path + ".countdown")) {
+            int parsedCountdown = plugin.getRewards().getInt(path + ".countdown");
+            if (parsedCountdown <= 0) {
+                plugin.getLogger().warning("Reward '" + path + "' has countdown <= 0 - rewards will be instantly re-claimable.");
+            }
+            this.countdown = parsedCountdown;
         }
         TimeUnit parsedUnit;
         try {

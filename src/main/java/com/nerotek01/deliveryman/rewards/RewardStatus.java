@@ -26,17 +26,24 @@ public class RewardStatus {
     private final Sound sound;
 
     public RewardStatus(Main plugin, String path) {
-        Material parsedMaterial;
+        String materialName = plugin.getRewards().get(path + ".material");
+        int dataValue = plugin.getRewards().getInt(path + ".data");
+
+        XMaterial xm;
         try {
-            parsedMaterial = Material.valueOf(plugin.getRewards().get(path + ".material"));
-        } catch (IllegalArgumentException ex) {
-            plugin.getLogger().warning("Invalid material '" + plugin.getRewards().get(path + ".material")
-                    + "' for '" + path + "' - defaulting to CHEST.");
+            xm = XMaterial.matchDefinedXMaterial(materialName, (byte) dataValue)
+                    .orElse(XMaterial.CHEST);
+        } catch (Exception ex) {
+            plugin.getLogger().warning("Invalid material '" + materialName + "' for '" + path + "' - defaulting to CHEST.");
+            xm = XMaterial.CHEST;
+        }
+        Material parsedMaterial = xm.parseMaterial();
+        if (parsedMaterial == null) {
             parsedMaterial = Material.CHEST;
         }
         this.material = parsedMaterial;
         this.amount = plugin.getRewards().getInt(path + ".amount");
-        this.data = (byte) plugin.getRewards().getInt(path + ".data");
+        this.data = (byte) dataValue;
 
         this.sound = XSound.matchXSound(plugin.getRewards()
                         .getOrDefault(path + ".sound", XSound.ENTITY_PLAYER_LEVELUP.parseSound().name()))
@@ -70,7 +77,7 @@ public class RewardStatus {
             loreWithPlaceholders.add(s.replace("<cooldown>", countdown).replace("<status>", status));
         }
         return new ItemUtils(XMaterial.matchDefinedXMaterial(this.material.name(), this.data)
-                .orElse(XMaterial.CHEST_MINECART))
+                .orElse(XMaterial.CHEST))
                 .setDisplayName(this.name.replace("<status>", status))
                 .setLore(loreWithPlaceholders)
                 .applyAttributes()
