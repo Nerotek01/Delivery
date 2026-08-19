@@ -5,6 +5,7 @@ import com.nerotek01.deliveryman.listeners.VotifierListener;
 import com.nerotek01.deliveryman.placeholders.MVdWPlaceholders;
 import com.nerotek01.deliveryman.placeholders.Placeholders;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.PluginManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.Map;
 public class AddonManager {
     private final Main plugin;
     private final Map<String, Boolean> availableAddons = new HashMap<>();
+    private final Map<String, Object> registeredHooks = new HashMap<>();
 
     public AddonManager(Main plugin) {
         this.plugin = plugin;
@@ -22,7 +24,10 @@ public class AddonManager {
 
         if (checkAddon("Votifier")) {
             try {
-                Bukkit.getPluginManager().registerEvents(new VotifierListener(plugin), plugin);
+                if (!registeredHooks.containsKey("Votifier")) {
+                    Bukkit.getPluginManager().registerEvents(new VotifierListener(plugin), plugin);
+                    registeredHooks.put("Votifier", Boolean.TRUE);
+                }
             } catch (Throwable ex) {
                 plugin.getPluginLogger().warning("Failed to load Votifier listener: " + ex.getMessage());
             }
@@ -30,7 +35,10 @@ public class AddonManager {
 
         if (checkAddon("PlaceholderAPI")) {
             try {
-                new Placeholders(plugin).register();
+                if (!registeredHooks.containsKey("PlaceholderAPI")) {
+                    new Placeholders(plugin).register();
+                    registeredHooks.put("PlaceholderAPI", Boolean.TRUE);
+                }
             } catch (Throwable ex) {
                 plugin.getPluginLogger().warning("Failed to register PlaceholderAPI: " + ex.getMessage());
             }
@@ -38,7 +46,10 @@ public class AddonManager {
 
         if (checkAddon("MVdWPlaceholderAPI")) {
             try {
-                new MVdWPlaceholders(plugin).register();
+                if (!registeredHooks.containsKey("MVdWPlaceholderAPI")) {
+                    new MVdWPlaceholders(plugin).register();
+                    registeredHooks.put("MVdWPlaceholderAPI", Boolean.TRUE);
+                }
             } catch (Throwable ex) {
                 plugin.getPluginLogger().warning("Failed to register MVdWPlaceholderAPI: " + ex.getMessage());
             }
@@ -47,7 +58,8 @@ public class AddonManager {
 
     private boolean checkAddon(String addonName) {
         boolean configEnabled = plugin.getConfig().getBoolean("addons." + addonName, false);
-        boolean pluginEnabled = Bukkit.getPluginManager().isPluginEnabled(addonName);
+        PluginManager pm = Bukkit.getPluginManager();
+        boolean pluginEnabled = pm != null && pm.isPluginEnabled(addonName);
 
         if (configEnabled && pluginEnabled) {
             plugin.getPluginLogger().info("Hooked into " + addonName + ".");
