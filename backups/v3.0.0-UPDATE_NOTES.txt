@@ -1,0 +1,37 @@
+Delivery v3.0.0 - Source Backup & Update Notes
+================================================
+
+Backup Created: 2026-08-19
+Branch: main
+Backup Type: Pre-v3.1.0 baseline (bug fixes and improvements)
+
+State of v3.0.0
+-----------------
+- Plugin name: Delivery (renamed from DeliveryMan)
+- Build system: Gradle 8.10.2 with com.gradleup.shadow 8.3.0
+- Java target: 21
+- Backend: MongoDB only (with optional Redis cache)
+- Commands: /rewards (alias /reward), /rewards reload (console)
+- 7 rank-based rewards (daily, default, vip, vip+, mvp, mvp+, mvp++)
+- ItemBurstEffect on claim
+
+Known Issues Scheduled for v3.1.0
+-----------------------------------
+1. Menu title color is dark black (&0) - should be faint gray (&7).
+2. Nether Star (mvp++) can be claimed infinitely because 'cooldown' was used
+   instead of 'countdown' in rewards.yml. Same bug affects mvp+.
+3. Claim chat message duplicates the menu text - should be different and
+   include the reward name.
+4. Menu refresh may feel slow due to unnecessary runTask wrapper in
+   updateActiveMenus.
+5. Reward materials are inconsistent - should all be ENDER_CHEST (daily:
+   CHEST_MINECART) when unclaimed, and MINECART when claimed.
+6. ItemBurstEffect items stick to the player - should swirl like a tornado.
+7. Duplicate '&aMystery Dust Delivery' green lore line should be removed.
+8. Lore says '5 Mystery Dust' for all rewards - should show correct amount.
+9. Config key 'rewardsMenu' should be 'rewardsmenu' (lowercase m).
+10. Join message shows even when menu is disabled.
+
+Action
+------
+This backup preserves the exact v3.0.0 source tree for rollback safety.
