@@ -17,12 +17,16 @@ rewards:
       data: 0
       amount: 1
       message: "&eYou claimed your &adaily delivery&e! &a+5 &eMystery Dust received."
-      name: "<status>Mystery Dust Delivery"
+      name: "<status>Daily Mystery Dust"
       lore:
-        - "&7Your free daily 5 Mystery Dust"
-        - "&7has arrived!"
+        - "&7This is a &adaily reward&7!"
+        - "&7You can claim it &aevery day&7."
+        - "&7Resets in &a24 hours&7."
         - ""
-        - "&eClick to loot!"
+        - "&7Your daily 5 Mystery Dust"
+        - "&7is ready to collect!"
+        - ""
+        - "<click>"
       sound: ENTITY_PLAYER_LEVELUP
       volume: 1
       pitch: 1
@@ -31,10 +35,10 @@ rewards:
       data: 0
       amount: 1
       message: "&cYou already claimed your daily delivery. Come back later! Next: &7<cooldown>"
-      name: "<status>Mystery Dust Delivery"
+      name: "<status>Daily Mystery Dust"
       lore:
-        - "&7You already picked up this delivery."
-        - "&7Come back later!"
+        - "&7You already picked up your daily delivery."
+        - "&7Come back tomorrow!"
         - ""
         - "&7Next Delivery: <cooldown>"
       sound: ENTITY_VILLAGER_NO
@@ -43,7 +47,7 @@ rewards:
 
   default:
     id: default
-    slot: 19
+    slot: 20
     permission: "delivery.default"
     countdown: 10
     timeUnit: DAYS
@@ -64,7 +68,7 @@ rewards:
         - "&7Your free monthly 25 Mystery Dust"
         - "&7for August has arrived!"
         - ""
-        - "&eClick to loot!"
+        - "<click>"
       sound: ENTITY_PLAYER_LEVELUP
       volume: 1
       pitch: 1
@@ -85,7 +89,7 @@ rewards:
 
   vip:
     id: vip
-    slot: 20
+    slot: 21
     permission: "delivery.vip"
     countdown: 10
     timeUnit: DAYS
@@ -108,7 +112,7 @@ rewards:
         - ""
         - "&7Requires &aVIP"
         - ""
-        - "&eClick to loot!"
+        - "<click>"
       sound: ENTITY_PLAYER_LEVELUP
       volume: 1
       pitch: 1
@@ -129,7 +133,7 @@ rewards:
 
   "vip+":
     id: "vip+"
-    slot: 21
+    slot: 22
     permission: "delivery.vip+"
     countdown: 10
     timeUnit: DAYS
@@ -152,7 +156,7 @@ rewards:
         - ""
         - "&7Requires &aVIP&6+"
         - ""
-        - "&eClick to loot!"
+        - "<click>"
       sound: ENTITY_PLAYER_LEVELUP
       volume: 1
       pitch: 1
@@ -173,7 +177,7 @@ rewards:
 
   mvp:
     id: mvp
-    slot: 22
+    slot: 23
     permission: "delivery.mvp"
     countdown: 10
     timeUnit: DAYS
@@ -196,7 +200,7 @@ rewards:
         - ""
         - "&7Requires &bMVP"
         - ""
-        - "&eClick to loot!"
+        - "<click>"
       sound: ENTITY_PLAYER_LEVELUP
       volume: 1
       pitch: 1
@@ -217,7 +221,7 @@ rewards:
 
   "mvp+":
     id: "mvp+"
-    slot: 23
+    slot: 24
     permission: "delivery.mvp+"
     countdown: 10
     timeUnit: DAYS
@@ -240,7 +244,7 @@ rewards:
         - ""
         - "&7Requires &bMVP&c+"
         - ""
-        - "&eClick to loot!"
+        - "<click>"
       sound: ENTITY_PLAYER_LEVELUP
       volume: 1
       pitch: 1
@@ -261,7 +265,7 @@ rewards:
 
   "mvp++":
     id: "mvp++"
-    slot: 24
+    slot: 29
     permission: "delivery.mvp++"
     countdown: 10
     timeUnit: DAYS
@@ -284,7 +288,7 @@ rewards:
         - ""
         - "&7Requires &bMVP&c++"
         - ""
-        - "&eClick to loot!"
+        - "<click>"
       sound: ENTITY_PLAYER_LEVELUP
       volume: 1
       pitch: 1

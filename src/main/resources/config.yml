@@ -1,6 +1,6 @@
 rewardsmenu:
   enabled: true
-  rows: 5
+  rows: 6
 
 database:
   host: 127.0.0.1
