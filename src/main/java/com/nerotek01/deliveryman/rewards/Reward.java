@@ -34,7 +34,16 @@ public class Reward {
 
     public Reward(Main plugin, String path) {
         this.id = plugin.getRewards().get(path + ".id");
-        this.type = RewardType.valueOf(plugin.getRewards().get(path + ".type"));
+
+        RewardType parsedType;
+        try {
+            parsedType = RewardType.valueOf(plugin.getRewards().get(path + ".type"));
+        } catch (IllegalArgumentException ex) {
+            plugin.getPluginLogger().warning("Invalid reward type for '" + path + "' - defaulting to NORMAL.");
+            parsedType = RewardType.NORMAL;
+        }
+        this.type = parsedType;
+
         this.permission = plugin.getRewards().get(path + ".permission");
         this.slot = plugin.getRewards().getInt(path + ".slot");
         this.fireworkExplode = plugin.getRewards().getBooleanOrDefault(path + ".fireworkExplode", false);
@@ -51,7 +60,14 @@ public class Reward {
 
         if (type == RewardType.NORMAL || type == RewardType.VOTE) {
             this.countdown = plugin.getRewards().getInt(path + ".countdown");
-            this.unit = TimeUnit.valueOf(plugin.getRewards().get(path + ".timeUnit"));
+            TimeUnit parsedUnit;
+            try {
+                parsedUnit = TimeUnit.valueOf(plugin.getRewards().get(path + ".timeUnit"));
+            } catch (IllegalArgumentException ex) {
+                plugin.getPluginLogger().warning("Invalid timeUnit for '" + path + "' - defaulting to DAYS.");
+                parsedUnit = TimeUnit.DAYS;
+            }
+            this.unit = parsedUnit;
         }
         if (type == RewardType.MESSAGE || type == RewardType.VOTE) {
             this.message = plugin.getRewards().get(path + ".message");

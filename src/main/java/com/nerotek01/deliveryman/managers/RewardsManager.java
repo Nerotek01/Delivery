@@ -27,10 +27,18 @@ public class RewardsManager {
         if (section == null) return;
 
         section.getKeys(false).forEach(r -> {
-            Reward reward = new Reward(plugin, "rewards." + r);
-            rewards.put(reward.getId(), reward);
-            if (reward.getType() == RewardType.VOTE) {
-                votes.put(reward.getVoteSite(), reward.getId());
+            try {
+                Reward reward = new Reward(plugin, "rewards." + r);
+                if (reward.getId() == null) {
+                    plugin.getPluginLogger().warning("Reward at 'rewards." + r + "' has no id - skipping.");
+                    return;
+                }
+                rewards.put(reward.getId(), reward);
+                if (reward.getType() == RewardType.VOTE) {
+                    votes.put(reward.getVoteSite(), reward.getId());
+                }
+            } catch (Throwable ex) {
+                plugin.getPluginLogger().warning("Failed to load reward 'rewards." + r + "': " + ex.getMessage());
             }
         });
     }

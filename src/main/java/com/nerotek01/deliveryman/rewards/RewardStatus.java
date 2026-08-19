@@ -26,7 +26,15 @@ public class RewardStatus {
     private final Sound sound;
 
     public RewardStatus(Main plugin, String path) {
-        this.material = Material.valueOf(plugin.getRewards().get(path + ".material"));
+        Material parsedMaterial;
+        try {
+            parsedMaterial = Material.valueOf(plugin.getRewards().get(path + ".material"));
+        } catch (IllegalArgumentException ex) {
+            plugin.getPluginLogger().warning("Invalid material '" + plugin.getRewards().get(path + ".material")
+                    + "' for '" + path + "' - defaulting to CHEST.");
+            parsedMaterial = Material.CHEST;
+        }
+        this.material = parsedMaterial;
         this.amount = plugin.getRewards().getInt(path + ".amount");
         this.data = (byte) plugin.getRewards().getInt(path + ".data");
 
