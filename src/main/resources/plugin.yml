@@ -1,37 +1,32 @@
-name: DeliveryMan
+name: Delivery
 main: com.nerotek01.deliveryman.Main
 version: ${version}
 api-version: 1.13
 author: Nerotek01
-description: DeliveryMan plugin with MongoDB, Redis, MySQL and SQLite backend support.
-softdepend:
-  - Votifier
-  - PlaceholderAPI
-  - MVdWPlaceholderAPI
+description: Delivery plugin with MongoDB and Redis backend support.
 commands:
-  deliveryman:
-    description: Main command for DeliveryMan
-    aliases: [ udm ]
+  rewards:
+    description: Open the rewards menu
+    aliases: [ reward ]
 permissions:
-  deliveryman.admin:
-    description: Admin permission (reload)
+  delivery.daily:
+    description: Access to the daily Mystery Dust reward
+    default: true
+  delivery.default:
+    description: Access to the default Mystery Dust reward
+    default: true
+  delivery.vip:
+    description: Access to the VIP Mystery Dust reward
     default: op
-  deliveryman.menu:
-    description: Allows opening the rewards menu
-    default: true
-  deliveryman.message1:
-    default: true
-  deliveryman.vote1:
-    default: true
-  deliveryman.unique1:
-    default: true
-  deliveryman.normal:
-    default: true
-  deliveryman.vip:
+  delivery.vip+:
+    description: Access to the VIP+ Mystery Dust reward
     default: op
-  deliveryman.vip+:
+  delivery.mvp:
+    description: Access to the MVP Mystery Dust reward
     default: op
-  deliveryman.mvip:
+  delivery.mvp+:
+    description: Access to the MVP+ Mystery Dust reward
     default: op
-  deliveryman.mvip+:
+  delivery.mvp++:
+    description: Access to the MVP++ Mystery Dust reward
     default: op
