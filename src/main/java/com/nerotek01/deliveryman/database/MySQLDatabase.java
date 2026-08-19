@@ -9,6 +9,8 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -66,11 +68,11 @@ public class MySQLDatabase implements Database {
 
     private String buildJdbcUrl() {
         boolean useSSL = plugin.getCm().isUseSSL();
+        String host = URLEncoder.encode(plugin.getCm().getIp(), StandardCharsets.UTF_8);
+        int port = plugin.getCm().getPort();
+        String database = URLEncoder.encode(plugin.getCm().getDatabase(), StandardCharsets.UTF_8);
         return String.format("jdbc:mysql://%s:%d/%s?useSSL=%s&characterEncoding=utf8&autoReconnect=true&useUnicode=true",
-                plugin.getCm().getIp(),
-                plugin.getCm().getPort(),
-                plugin.getCm().getDatabase(),
-                useSSL);
+                host, port, database, useSSL);
     }
 
     private void createTable() {
@@ -101,11 +103,11 @@ public class MySQLDatabase implements Database {
                     if (pd == null) {
                         pd = new PlayerData(p.getUniqueId());
                     }
-                    plugin.getDm().addPlayer(p, pd);
                 } else {
                     pd = new PlayerData(p.getUniqueId());
                     createNewPlayer(p, pd);
                 }
+                plugin.getDm().addPlayer(p, pd);
                 final PlayerData loaded = pd;
                 if (plugin.getDb() instanceof CachedDatabase) {
                     ((CachedDatabase) plugin.getDb()).onBackendLoaded(p, loaded);
@@ -128,7 +130,6 @@ public class MySQLDatabase implements Database {
             stmt.setString(2, p.getName());
             stmt.setString(3, jsonData);
             stmt.executeUpdate();
-            plugin.getDm().addPlayer(p, pd);
         }
     }
 
@@ -136,6 +137,9 @@ public class MySQLDatabase implements Database {
     public void savePlayer(final Player p) {
         final PlayerData pd = plugin.getDm().getPlayerData(p);
         if (pd == null) return;
+        if (!plugin.getDm().markSaving(p.getUniqueId())) {
+            return;
+        }
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             String sql = "UPDATE DeliveryMan SET Data = ?, Name = ? WHERE UUID = ?";
             String jsonData = plugin.getGson().toJson(pd);
@@ -148,7 +152,7 @@ public class MySQLDatabase implements Database {
             } catch (SQLException e) {
                 plugin.getPluginLogger().warning("Failed to save player data for " + p.getName(), e);
             } finally {
-                plugin.getDm().removePlayer(p);
+                plugin.getDm().unmarkSaving(p.getUniqueId());
             }
         });
     }
@@ -167,8 +171,6 @@ public class MySQLDatabase implements Database {
             stmt.executeUpdate();
         } catch (SQLException e) {
             plugin.getPluginLogger().warning("Failed to save player data (sync) for " + p.getName(), e);
-        } finally {
-            plugin.getDm().removePlayer(p);
         }
     }
 
