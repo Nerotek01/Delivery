@@ -114,6 +114,7 @@ public class MenuListener implements Listener {
         UUID uuid = e.getPlayer().getUniqueId();
         lastClickTime.remove(uuid);
         lastSpamMessageTime.remove(uuid);
+        ItemBurstEffect.cleanupPlayer(uuid);
     }
 
     private boolean isClickCooldownActive(Player p) {

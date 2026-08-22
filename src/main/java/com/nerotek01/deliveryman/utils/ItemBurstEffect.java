@@ -85,15 +85,11 @@ public class ItemBurstEffect {
                         if (item.isValid()) item.remove();
                     }
                     active.remove(uuid);
-                    ConcurrentLinkedDeque<Runnable> queue = queues.get(uuid);
-                    if (queue != null) {
+                    ConcurrentLinkedDeque<Runnable> queue = queues.remove(uuid);
+                    if (player.isOnline() && queue != null) {
                         Runnable next = queue.poll();
                         if (next != null) {
-                            if (player.isOnline()) {
-                                next.run();
-                            }
-                        } else {
-                            queues.remove(uuid);
+                            next.run();
                         }
                     }
                     cancel();
@@ -122,5 +118,11 @@ public class ItemBurstEffect {
                 ticks++;
             }
         }.runTaskTimer(plugin, 1L, 1L);
+    }
+
+    public static void cleanupPlayer(UUID uuid) {
+        active.remove(uuid);
+        ConcurrentLinkedDeque<Runnable> q = queues.remove(uuid);
+        if (q != null) q.clear();
     }
 }
