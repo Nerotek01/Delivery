@@ -39,11 +39,25 @@ public class RewardsManager {
 
     public int getAvailableRewards(Player p, PlayerData pd) {
         if (pd == null) return 0;
-
+        long now = System.currentTimeMillis();
         return (int) rewards.values().stream()
                 .filter(r -> p.hasPermission(r.getPermission()))
-                .filter(r -> !pd.getClaimed().containsKey(r.getId()))
+                .filter(r -> {
+                    if (!pd.hasClaimed(r.getId())) return true;
+                    long claimedTime = pd.getClaimTime(r.getId());
+                    long cooldownEnd = claimedTime + r.getUnit().toMillis(r.getCountdown());
+                    return now >= cooldownEnd;
+                })
                 .count();
+    }
+
+    public boolean isRewardAvailable(Player p, PlayerData pd, Reward r) {
+        if (pd == null || r == null) return false;
+        if (!p.hasPermission(r.getPermission())) return false;
+        if (!pd.hasClaimed(r.getId())) return true;
+        long claimedTime = pd.getClaimTime(r.getId());
+        long cooldownEnd = claimedTime + r.getUnit().toMillis(r.getCountdown());
+        return System.currentTimeMillis() >= cooldownEnd;
     }
 
     public Map<String, Reward> getRewards() { return rewards; }
