@@ -104,6 +104,7 @@ public class RewardMenu {
                 inventory.setItem(reward.getSlot(), createRewardIcon(player, playerData, reward)));
         inventory.setItem(CLOSE_SLOT, createCloseButton());
         inventory.setItem(INFO_SLOT, createInfoBook());
+        player.updateInventory();
     }
 
     private ItemStack createRewardIcon(Player player, PlayerData playerData, Reward reward) {
