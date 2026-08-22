@@ -37,7 +37,7 @@ A high-performance Minecraft rewards plugin developed by Nerotek01. Provides a c
 - Menu slot 53 contains a Written Book named "Menu Guide" with a player-facing description of the menu.
 - Item Burst Effect: when a player claims any reward, 16-20 item entities (random mix of emeralds and diamonds) swirl around the player's head in a tornado-like pattern for 5 seconds. Approximately 30% of the items have an enchantment glow. Items cannot be picked up and are removed after 5 seconds. If a player claims a second reward while the first animation is still playing, the second animation is queued and plays after the first one finishes.
 - Reward claim plays a configurable sound (default: `ENTITY_PLAYER_LEVELUP`).
-- Join messages are single-line strings without decorative bars. The message is hoverable (shows "Click here to open the rewards menu!") and clickable (runs `/rewards`):
+- Join messages are single-line strings without decorative bars. The message is hoverable (shows "Click here to open the rewards menu!") and clickable (runs `/rewards`). The `<rewards>` count includes all rewards the player can claim, including those whose cooldown has expired since the last claim (e.g., daily rewards ready to be claimed again):
   - When rewards are available: `&aYou can collect &e<rewards> &arewards right now.`
   - When no rewards are available: `&7There are no rewards to collect right now.`
 - Menu title color is faint gray (`&7Rewards Menu`).
