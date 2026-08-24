@@ -49,15 +49,20 @@ A high-performance Minecraft rewards plugin developed by Nerotek01. Provides a c
 - Daily reward has unique lore text clearly indicating it is a daily reward claimable every day.
 - The menu layout uses 6 rows (54 slots). Reward slots: daily=13, default=20, vip=21, vip+=22, mvp=23, mvp+=24, mvp++=29. Close button at slot 49, Info book at slot 53.
 - MongoDB persistence with optional Redis cache layer (write-through):
-  - On load: cache GET is performed asynchronously; cache hit returns immediately, cache miss loads from MongoDB and writes back to Redis.
-  - On save: MongoDB is updated and the Redis cache is updated asynchronously.
+  - On claim: the reward claim is written to MongoDB (and Redis when enabled) immediately at claim time through an asynchronous write-through pipeline, so cooldowns survive relogs, server restarts, and crashes.
+  - On load: the player's data is fetched asynchronously as soon as the player joins; a cache hit is served from Redis, a cache miss is loaded from MongoDB and written back to Redis.
+  - Loaded data is merged into the in-memory session with newest-timestamp-wins semantics per reward, so a late-arriving load can never erase a claim that was recorded moments after joining.
+  - On save: staged player states are flushed by a single deduplicated asynchronous task per player (MongoDB upsert first, then the Redis cache refresh inside the same task). A failed flush keeps the state staged and retries automatically.
+  - On shutdown: all online players are saved synchronously and every still-staged pending save is drained synchronously before the MongoDB client closes, so no queued write is lost.
+  - Player records are created with an upsert, so a concurrent or lagged read can never abort the load with a duplicate-key error.
 - Graceful degradation: if Redis is unavailable, the plugin continues to work with MongoDB only.
 - Live Redis cache reload: changing `redis.*` keys and running `/rewards reload` reconfigures the Jedis pool without restarting the server.
 - Atomic configuration reload: `ConfigManager.reload` parses all values into local variables first, then assigns them to fields only if every value parses successfully.
 - Menu disable toggle: when `rewardsmenu.enabled` is `false`, opening the menu shows the message `&cThis feature is temporarily disabled until further notice. This may only be on this server!` (red, single line). When the menu is disabled, join messages are also suppressed.
 - Custom API event `DeliveryPlayerLoadEvent` fired on the main thread whenever a player's data finishes loading.
-- Thread-safe player data storage using `ConcurrentHashMap` for the player cache and the saving-flag set. A `markSaving`/`unmarkSaving` flag prevents the same player from being enqueued for save twice when `PlayerQuitEvent` is processed.
-- Atomic shutdown procedure: on disable, all online players are synchronously saved to MongoDB before connections are closed, and the in-memory player cache is cleared.
+- Thread-safe player data storage using `ConcurrentHashMap` for the player cache and the pending-save registry. A per-player flush guard guarantees at most one asynchronous flush task per player while coalescing any number of staged writes into that single task.
+- Player entries are removed from the in-memory cache as soon as the quit-time save is staged, keeping memory usage bounded to the online player set.
+- Atomic shutdown procedure: on disable, all online players are synchronously saved, all staged pending saves are drained to MongoDB, and the in-memory player cache is cleared.
 
 ## Commands
 
@@ -177,7 +182,7 @@ cd Delivery
 
 On Windows, use `gradlew.bat` instead of `./gradlew`.
 
-The compiled artifact will be at `build/libs/Delivery-<version>.jar` (for example `build/libs/Delivery-3.2.0.jar`). The `-slim` jar in the same directory is the non-shaded intermediate output and is not intended for direct installation on a server.
+The compiled artifact will be at `build/libs/Delivery-<version>.jar` (for example `build/libs/Delivery-3.3.0.jar`). The `-slim` jar in the same directory is the non-shaded intermediate output and is not intended for direct installation on a server.
 
 ### Build System Details
 
