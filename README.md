@@ -19,7 +19,7 @@ A high-performance Minecraft rewards plugin developed by Nerotek01. Provides a c
 
 ## Features
 
-- Configurable rewards menu with adjustable row count (5 or 6 rows, default 6). The menu title color is faint gray.
+- Configurable rewards menu with adjustable row count (5 or 6 rows, default 6). The menu title color is dark gray.
 - Seven rank-based Mystery Dust rewards with a 10-day cooldown (daily reward uses a 1-day cooldown):
   - `daily` - 5 Mystery Dust, every 1 day, available to everyone.
   - `default` - 25 Mystery Dust, every 10 days, available to everyone.
@@ -40,7 +40,7 @@ A high-performance Minecraft rewards plugin developed by Nerotek01. Provides a c
 - Join messages are single-line strings without decorative bars. The message is hoverable (shows "Click here to open the rewards menu!") and clickable (runs `/rewards`). The `<rewards>` count includes all rewards the player can claim, including those whose cooldown has expired since the last claim (e.g., daily rewards ready to be claimed again):
   - When rewards are available: `&aYou can collect &e<rewards> &arewards right now.`
   - When no rewards are available: `&7There are no rewards to collect right now.`
-- Menu title color is faint gray (`&7Rewards Menu`).
+- Menu title color is dark gray (`&8Rewards Menu`).
 - Reward icons use consistent materials: all unclaimed rank rewards use `ENDER_CHEST`, the daily reward uses `CHEST_MINECART`. When claimed, all rewards show as `MINECART` (without chest).
 - Chat messages on claim are distinct from the menu lore text and include the reward rank name and Mystery Dust amount (e.g., `&eYou claimed your &aVIP delivery&e! &a+45 &eMystery Dust received.`).
 - Chat messages on already-claimed rewards include the reward rank name and the remaining cooldown (e.g., `&cYou already claimed your VIP delivery. Come back later! Next: &7<cooldown>`).
@@ -153,7 +153,7 @@ Contains all translatable strings:
 - `messages.joinNoRewards` - single-line message sent on join when no rewards are available. Placeholders: `<player>`.
 - `setup.disabled` - message sent when the menu is disabled via config.
 - `countdown.days`, `countdown.hours`, `countdown.minutes`, `countdown.seconds` - countdown formats. Placeholders: `<days>`, `<hours>`, `<minutes>`, `<seconds>`.
-- `menus.rewards.title` - inventory title of the rewards menu (default: `&7Rewards Menu`).
+- `menus.rewards.title` - inventory title of the rewards menu (default: `&8Rewards Menu`).
 
 All strings support the `&` color code prefix.
 
