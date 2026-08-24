@@ -1,0 +1,194 @@
+{
+  "version": "3.3.0",
+  "tests": 35,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "test_suites": [
+    {
+      "name": "com.nerotek01.deliveryman.CountdownFormatTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "zeroMillisReturnsSeconds()",
+          "status": "passed"
+        },
+        {
+          "name": "tenDaysFormatsCorrectly()",
+          "status": "passed"
+        },
+        {
+          "name": "twelveDaysTwelveHoursTwelveMinutesTwelveSeconds()",
+          "status": "passed"
+        },
+        {
+          "name": "countdownFormatterHandlesNegativeInput()",
+          "status": "passed"
+        },
+        {
+          "name": "oneDayOnlyHasDays()",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "com.nerotek01.deliveryman.DailyRewardPersistenceTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "mapValueTypesSurviveRoundTrip()",
+          "status": "passed"
+        },
+        {
+          "name": "multipleRewardsSurviveRoundTrip()",
+          "status": "passed"
+        },
+        {
+          "name": "corruptedJsonThrowsAndRequiresExplicitFallback()",
+          "status": "passed"
+        },
+        {
+          "name": "gsonRoundTripPreservesClaimTimestamp()",
+          "status": "passed"
+        },
+        {
+          "name": "claimSurvivesSimulatedRejoin()",
+          "status": "passed"
+        },
+        {
+          "name": "nullLiteralJsonDeserializesToNull()",
+          "status": "passed"
+        },
+        {
+          "name": "freshPlayerDataHasNoClaims()",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "com.nerotek01.deliveryman.NameSanitizationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "patternBehaviorMatchesExpectation()",
+          "status": "passed"
+        },
+        {
+          "name": "nameWithSemicolonIsStripped()",
+          "status": "passed"
+        },
+        {
+          "name": "nullNameReturnsEmpty()",
+          "status": "passed"
+        },
+        {
+          "name": "alphanumericNameIsPreserved()",
+          "status": "passed"
+        },
+        {
+          "name": "nameWithSpaceIsStripped()",
+          "status": "passed"
+        },
+        {
+          "name": "nameWithPipeIsStripped()",
+          "status": "passed"
+        },
+        {
+          "name": "allSpecialCharNameFallsBackToOriginal()",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "com.nerotek01.deliveryman.PlayerDataMergeTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "lateLoadDoesNotEraseNewerInMemoryClaim()",
+          "status": "passed"
+        },
+        {
+          "name": "loadedNewerClaimOverwritesOlderInMemoryClaim()",
+          "status": "passed"
+        },
+        {
+          "name": "fullRejoinCycleEnforcesCooldown()",
+          "status": "passed"
+        },
+        {
+          "name": "removedClaimIsNotResurrectedByOlderLoadEntry()",
+          "status": "passed"
+        },
+        {
+          "name": "streaksMergeKeepsHighestValue()",
+          "status": "passed"
+        },
+        {
+          "name": "removePlayerClearsEntry()",
+          "status": "passed"
+        },
+        {
+          "name": "loadedClaimFillsMissingInMemoryKey()",
+          "status": "passed"
+        },
+        {
+          "name": "mergeIntoEmptyMapInstallsLoadedData()",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "name": "com.nerotek01.deliveryman.RankNameFormatTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "vipPlusFormatIsCorrect()",
+          "status": "passed"
+        },
+        {
+          "name": "allRanksProduceNonEmptyOutput()",
+          "status": "passed"
+        },
+        {
+          "name": "requiresLineIncludesCorrectRank()",
+          "status": "passed"
+        },
+        {
+          "name": "mvpPlusPlusFormatIsCorrect()",
+          "status": "passed"
+        },
+        {
+          "name": "vipFormatIsCorrect()",
+          "status": "passed"
+        },
+        {
+          "name": "plusRanksUseAppropriateColors()",
+          "status": "passed"
+        },
+        {
+          "name": "mvpFormatIsCorrect()",
+          "status": "passed"
+        },
+        {
+          "name": "mvpPlusFormatIsCorrect()",
+          "status": "passed"
+        }
+      ]
+    }
+  ]
+}

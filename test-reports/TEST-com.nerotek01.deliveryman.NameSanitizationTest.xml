@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.nerotek01.deliveryman.NameSanitizationTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-08-22T05:40:51" hostname="c-6a892430-145d6674-aa3a6ecbf463" time="0.028">
+<testsuite name="com.nerotek01.deliveryman.NameSanitizationTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-08-24T16:09:20" hostname="c-6a8c63bd-145d6674-d210503ea001" time="0.022">
   <properties/>
-  <testcase name="patternBehaviorMatchesExpectation()" classname="com.nerotek01.deliveryman.NameSanitizationTest" time="0.004"/>
-  <testcase name="nameWithSemicolonIsStripped()" classname="com.nerotek01.deliveryman.NameSanitizationTest" time="0.001"/>
+  <testcase name="patternBehaviorMatchesExpectation()" classname="com.nerotek01.deliveryman.NameSanitizationTest" time="0.001"/>
+  <testcase name="nameWithSemicolonIsStripped()" classname="com.nerotek01.deliveryman.NameSanitizationTest" time="0.0"/>
   <testcase name="nullNameReturnsEmpty()" classname="com.nerotek01.deliveryman.NameSanitizationTest" time="0.001"/>
   <testcase name="alphanumericNameIsPreserved()" classname="com.nerotek01.deliveryman.NameSanitizationTest" time="0.001"/>
   <testcase name="nameWithSpaceIsStripped()" classname="com.nerotek01.deliveryman.NameSanitizationTest" time="0.001"/>
-  <testcase name="nameWithPipeIsStripped()" classname="com.nerotek01.deliveryman.NameSanitizationTest" time="0.001"/>
-  <testcase name="allSpecialCharNameFallsBackToOriginal()" classname="com.nerotek01.deliveryman.NameSanitizationTest" time="0.006"/>
+  <testcase name="nameWithPipeIsStripped()" classname="com.nerotek01.deliveryman.NameSanitizationTest" time="0.0"/>
+  <testcase name="allSpecialCharNameFallsBackToOriginal()" classname="com.nerotek01.deliveryman.NameSanitizationTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>
