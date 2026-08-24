@@ -1,0 +1,10 @@
+Backup of v3.3.0 source state before v3.3.1 changes.
+
+Context:
+- Issue #17 requested changing the rewards menu title color from gray to dark gray.
+- This archive captures the exact source tree of v3.3.0 (commit 7babe84) prior to applying the v3.3.1 title color change.
+
+State:
+- Version in gradle.properties: 3.3.0
+- Menu title default in lang.yml: "&7Rewards Menu"
+- No functional code changes are planned for v3.3.1; only the default title color, README references, and the version bump.
