@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.nerotek01.deliveryman.CountdownFormatTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-08-24T16:09:20" hostname="c-6a8c63bd-145d6674-d210503ea001" time="0.023">
+<testsuite name="com.nerotek01.deliveryman.CountdownFormatTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-08-24T19:43:41" hostname="c-6a8c9a25-145d6674-4340c9327de9" time="0.056">
   <properties/>
-  <testcase name="zeroMillisReturnsSeconds()" classname="com.nerotek01.deliveryman.CountdownFormatTest" time="0.013"/>
+  <testcase name="zeroMillisReturnsSeconds()" classname="com.nerotek01.deliveryman.CountdownFormatTest" time="0.047"/>
   <testcase name="tenDaysFormatsCorrectly()" classname="com.nerotek01.deliveryman.CountdownFormatTest" time="0.001"/>
-  <testcase name="twelveDaysTwelveHoursTwelveMinutesTwelveSeconds()" classname="com.nerotek01.deliveryman.CountdownFormatTest" time="0.001"/>
-  <testcase name="countdownFormatterHandlesNegativeInput()" classname="com.nerotek01.deliveryman.CountdownFormatTest" time="0.0"/>
+  <testcase name="twelveDaysTwelveHoursTwelveMinutesTwelveSeconds()" classname="com.nerotek01.deliveryman.CountdownFormatTest" time="0.0"/>
+  <testcase name="countdownFormatterHandlesNegativeInput()" classname="com.nerotek01.deliveryman.CountdownFormatTest" time="0.001"/>
   <testcase name="oneDayOnlyHasDays()" classname="com.nerotek01.deliveryman.CountdownFormatTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>

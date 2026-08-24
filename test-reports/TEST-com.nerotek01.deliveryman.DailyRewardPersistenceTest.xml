@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.nerotek01.deliveryman.DailyRewardPersistenceTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-08-24T16:09:20" hostname="c-6a8c63bd-145d6674-d210503ea001" time="0.059">
+<testsuite name="com.nerotek01.deliveryman.DailyRewardPersistenceTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-08-24T19:43:42" hostname="c-6a8c9a25-145d6674-4340c9327de9" time="0.103">
   <properties/>
-  <testcase name="mapValueTypesSurviveRoundTrip()" classname="com.nerotek01.deliveryman.DailyRewardPersistenceTest" time="0.011"/>
-  <testcase name="multipleRewardsSurviveRoundTrip()" classname="com.nerotek01.deliveryman.DailyRewardPersistenceTest" time="0.002"/>
-  <testcase name="corruptedJsonThrowsAndRequiresExplicitFallback()" classname="com.nerotek01.deliveryman.DailyRewardPersistenceTest" time="0.002"/>
-  <testcase name="gsonRoundTripPreservesClaimTimestamp()" classname="com.nerotek01.deliveryman.DailyRewardPersistenceTest" time="0.001"/>
-  <testcase name="claimSurvivesSimulatedRejoin()" classname="com.nerotek01.deliveryman.DailyRewardPersistenceTest" time="0.014"/>
-  <testcase name="nullLiteralJsonDeserializesToNull()" classname="com.nerotek01.deliveryman.DailyRewardPersistenceTest" time="0.001"/>
-  <testcase name="freshPlayerDataHasNoClaims()" classname="com.nerotek01.deliveryman.DailyRewardPersistenceTest" time="0.001"/>
+  <testcase name="mapValueTypesSurviveRoundTrip()" classname="com.nerotek01.deliveryman.DailyRewardPersistenceTest" time="0.023"/>
+  <testcase name="multipleRewardsSurviveRoundTrip()" classname="com.nerotek01.deliveryman.DailyRewardPersistenceTest" time="0.031"/>
+  <testcase name="corruptedJsonThrowsAndRequiresExplicitFallback()" classname="com.nerotek01.deliveryman.DailyRewardPersistenceTest" time="0.005"/>
+  <testcase name="gsonRoundTripPreservesClaimTimestamp()" classname="com.nerotek01.deliveryman.DailyRewardPersistenceTest" time="0.009"/>
+  <testcase name="claimSurvivesSimulatedRejoin()" classname="com.nerotek01.deliveryman.DailyRewardPersistenceTest" time="0.022"/>
+  <testcase name="nullLiteralJsonDeserializesToNull()" classname="com.nerotek01.deliveryman.DailyRewardPersistenceTest" time="0.002"/>
+  <testcase name="freshPlayerDataHasNoClaims()" classname="com.nerotek01.deliveryman.DailyRewardPersistenceTest" time="0.002"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

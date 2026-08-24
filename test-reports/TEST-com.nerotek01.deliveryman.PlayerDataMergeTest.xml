@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.nerotek01.deliveryman.PlayerDataMergeTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-08-24T16:09:20" hostname="c-6a8c63bd-145d6674-d210503ea001" time="0.051">
+<testsuite name="com.nerotek01.deliveryman.PlayerDataMergeTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-08-24T19:43:42" hostname="c-6a8c9a25-145d6674-4340c9327de9" time="0.05">
   <properties/>
-  <testcase name="lateLoadDoesNotEraseNewerInMemoryClaim()" classname="com.nerotek01.deliveryman.PlayerDataMergeTest" time="0.002"/>
-  <testcase name="loadedNewerClaimOverwritesOlderInMemoryClaim()" classname="com.nerotek01.deliveryman.PlayerDataMergeTest" time="0.002"/>
-  <testcase name="fullRejoinCycleEnforcesCooldown()" classname="com.nerotek01.deliveryman.PlayerDataMergeTest" time="0.002"/>
+  <testcase name="lateLoadDoesNotEraseNewerInMemoryClaim()" classname="com.nerotek01.deliveryman.PlayerDataMergeTest" time="0.004"/>
+  <testcase name="loadedNewerClaimOverwritesOlderInMemoryClaim()" classname="com.nerotek01.deliveryman.PlayerDataMergeTest" time="0.023"/>
+  <testcase name="fullRejoinCycleEnforcesCooldown()" classname="com.nerotek01.deliveryman.PlayerDataMergeTest" time="0.001"/>
   <testcase name="removedClaimIsNotResurrectedByOlderLoadEntry()" classname="com.nerotek01.deliveryman.PlayerDataMergeTest" time="0.001"/>
-  <testcase name="streaksMergeKeepsHighestValue()" classname="com.nerotek01.deliveryman.PlayerDataMergeTest" time="0.0"/>
-  <testcase name="removePlayerClearsEntry()" classname="com.nerotek01.deliveryman.PlayerDataMergeTest" time="0.007"/>
+  <testcase name="streaksMergeKeepsHighestValue()" classname="com.nerotek01.deliveryman.PlayerDataMergeTest" time="0.001"/>
+  <testcase name="removePlayerClearsEntry()" classname="com.nerotek01.deliveryman.PlayerDataMergeTest" time="0.001"/>
   <testcase name="loadedClaimFillsMissingInMemoryKey()" classname="com.nerotek01.deliveryman.PlayerDataMergeTest" time="0.001"/>
-  <testcase name="mergeIntoEmptyMapInstallsLoadedData()" classname="com.nerotek01.deliveryman.PlayerDataMergeTest" time="0.001"/>
+  <testcase name="mergeIntoEmptyMapInstallsLoadedData()" classname="com.nerotek01.deliveryman.PlayerDataMergeTest" time="0.004"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>
