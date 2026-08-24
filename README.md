@@ -182,7 +182,7 @@ cd Delivery
 
 On Windows, use `gradlew.bat` instead of `./gradlew`.
 
-The compiled artifact will be at `build/libs/Delivery-<version>.jar` (for example `build/libs/Delivery-3.3.0.jar`). The `-slim` jar in the same directory is the non-shaded intermediate output and is not intended for direct installation on a server.
+The compiled artifact will be at `build/libs/Delivery-<version>.jar` (for example `build/libs/Delivery-3.3.1.jar`). The `-slim` jar in the same directory is the non-shaded intermediate output and is not intended for direct installation on a server.
 
 ### Build System Details
 
