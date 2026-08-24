@@ -1,0 +1,11 @@
+Backup of v3.2.3 source state before v3.3.0 changes.
+
+Context:
+- Issue #16 reported that daily reward cooldowns are lost when a player disconnects and reconnects, allowing the same reward to be claimed again.
+- Root cause: claim timestamps were only held in memory and persisted solely through the asynchronous quit-time save. Several race conditions (delayed async load overwriting newer in-memory claims, silent save skip when player data was not yet loaded, stale Redis snapshots on fast relog, duplicate-key abort in createNewPlayer, and cancelled async saves during shutdown) could drop the claim before it reached MongoDB.
+- This archive captures the exact source tree of v3.2.3 (commit 948307b) prior to applying the v3.3.0 persistence rework.
+
+State:
+- Version in gradle.properties: 3.2.3
+- Database backend: MongoDB with optional Redis cache layer
+- Known defects present in this snapshot: no write-through on claim, blind map overwrite on load, insertOne based player creation, quit-time-only persistence, unbounded in-memory player map.
