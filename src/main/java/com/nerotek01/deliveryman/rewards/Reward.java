@@ -54,9 +54,10 @@ public class Reward {
             this.countdown = parsedCountdown;
         }
         TimeUnit parsedUnit;
+        String unitName = plugin.getRewards().get(path + ".timeUnit");
         try {
-            parsedUnit = TimeUnit.valueOf(plugin.getRewards().get(path + ".timeUnit"));
-        } catch (IllegalArgumentException ex) {
+            parsedUnit = TimeUnit.valueOf(unitName);
+        } catch (IllegalArgumentException | NullPointerException ex) {
             plugin.getLogger().warning("Invalid timeUnit for '" + path + "' - defaulting to DAYS.");
             parsedUnit = TimeUnit.DAYS;
         }

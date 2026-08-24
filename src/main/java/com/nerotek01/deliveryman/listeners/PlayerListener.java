@@ -31,7 +31,7 @@ public class PlayerListener implements Listener {
         if (!plugin.getCm().isMenuEnabled()) {
             return;
         }
-        PlayerData pd = plugin.getDm().getPlayerData(p);
+        PlayerData pd = plugin.getDm().getPlayerData(p.getUniqueId());
         if (pd == null) {
             return;
         }
@@ -53,10 +53,8 @@ public class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onQuit(PlayerQuitEvent e) {
-        handlePlayerLeave(e.getPlayer());
-    }
-
-    private void handlePlayerLeave(Player p) {
+        Player p = e.getPlayer();
         plugin.getDb().savePlayer(p);
+        plugin.getDm().removePlayer(p.getUniqueId());
     }
 }

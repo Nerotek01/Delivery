@@ -34,9 +34,9 @@ public class RewardMenu {
         String title = plugin.getLang().get("menus.rewards.title");
         Inventory inventory = Bukkit.createInventory(null, rows * 9, title);
 
-        PlayerData playerData = plugin.getDm().getPlayerData(player);
+        PlayerData playerData = plugin.getDm().getPlayerData(player.getUniqueId());
         if (playerData == null) {
-            playerData = plugin.getDm().getOrCreatePlayerData(player);
+            playerData = plugin.getDm().getOrCreatePlayerData(player.getUniqueId());
         }
         final PlayerData finalPd = playerData;
         plugin.getRm().getRewards().values().forEach(reward ->
@@ -96,7 +96,7 @@ public class RewardMenu {
 
     private void updateInventory(Player player, Inventory inventory) {
         if (!player.isOnline()) return;
-        PlayerData playerData = plugin.getDm().getPlayerData(player);
+        PlayerData playerData = plugin.getDm().getPlayerData(player.getUniqueId());
         if (playerData == null) {
             return;
         }

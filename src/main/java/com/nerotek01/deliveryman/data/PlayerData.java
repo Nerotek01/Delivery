@@ -20,10 +20,6 @@ public class PlayerData {
         this.streaks = new ConcurrentHashMap<>();
     }
 
-    public UUID getUuid() {
-        return uuid;
-    }
-
     public Map<String, Integer> getStreaks() {
         return Collections.unmodifiableMap(streaks);
     }
@@ -46,16 +42,6 @@ public class PlayerData {
 
     public void resetClaim(String key) {
         claimed.remove(key);
-    }
-
-    public void setAllStreaks(Map<String, Integer> newStreaks) {
-        streaks.clear();
-        if (newStreaks != null) streaks.putAll(newStreaks);
-    }
-
-    public void setAllClaims(Map<String, Long> newClaims) {
-        claimed.clear();
-        if (newClaims != null) claimed.putAll(newClaims);
     }
 
     public boolean hasClaimed(String key) {

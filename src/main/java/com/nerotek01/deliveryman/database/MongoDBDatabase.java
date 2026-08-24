@@ -17,18 +17,27 @@ import com.nerotek01.deliveryman.interfaces.Database;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.IllegalPluginAccessException;
 
 import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MongoDBDatabase implements Database {
 
     private static final String COLLECTION = "players";
     private static final String CACHE_PREFIX = "player:";
 
+    private record PendingSave(String name, PlayerData data) {
+    }
+
     private final Main plugin;
     private final RedisCache redis;
     private final Gson gson;
+    private final Map<UUID, PendingSave> pendingSaves = new ConcurrentHashMap<>();
+    private final Set<UUID> flushing = ConcurrentHashMap.newKeySet();
     private MongoClient client;
     private MongoCollection<Document> collection;
 
@@ -65,24 +74,23 @@ public class MongoDBDatabase implements Database {
             db.runCommand(new Document("ping", 1));
         } catch (Exception ex) {
             plugin.getLogger().severe("MongoDB connection failed: " + ex.getMessage());
-            ex.printStackTrace();
             Bukkit.getPluginManager().disablePlugin(plugin);
         }
     }
 
-    private String cacheKey(Player p) {
-        return CACHE_PREFIX + p.getUniqueId();
+    private String cacheKey(UUID uuid) {
+        return CACHE_PREFIX + uuid;
     }
 
     @Override
     public void loadPlayer(final Player p) {
-        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
+        UUID uuid = p.getUniqueId();
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
-                UUID uuid = p.getUniqueId();
                 PlayerData pd = null;
 
                 if (redis.isEnabled()) {
-                    String json = redis.get(cacheKey(p));
+                    String json = redis.get(cacheKey(uuid));
                     if (json != null) {
                         try {
                             pd = gson.fromJson(json, PlayerData.class);
@@ -92,79 +100,106 @@ public class MongoDBDatabase implements Database {
                 }
 
                 if (pd == null) {
-                    Document query = new Document("_id", uuid.toString());
-                    Document doc = collection.find(query).first();
+                    Document doc = collection.find(new Document("_id", uuid.toString())).first();
                     if (doc != null && doc.containsKey("data")) {
-                        String json = doc.getString("data");
-                        pd = gson.fromJson(json, PlayerData.class);
-                        if (pd == null) {
-                            pd = new PlayerData(uuid);
+                        try {
+                            pd = gson.fromJson(doc.getString("data"), PlayerData.class);
+                        } catch (Exception ignored) {
                         }
-                    } else {
-                        pd = new PlayerData(uuid);
-                        createNewPlayer(p, pd);
-                    }
-
-                    if (redis.isEnabled() && pd != null) {
-                        redis.setAsync(cacheKey(p), gson.toJson(pd));
                     }
                 }
 
-                plugin.getDm().addPlayer(p, pd);
+                if (pd == null) {
+                    pd = new PlayerData(uuid);
+                    upsertPlayerRecord(p.getName(), uuid, gson.toJson(pd));
+                }
+
+                if (redis.isEnabled()) {
+                    redis.set(cacheKey(uuid), gson.toJson(pd));
+                }
+
+                plugin.getDm().mergePlayer(uuid, pd);
                 fireLoadEvent(p);
             } catch (Exception ex) {
                 plugin.getLogger().warning("Failed to load player data for " + p.getName() + ": " + ex.getMessage());
-            }
-        }, 10L);
-    }
-
-    private void createNewPlayer(Player p, PlayerData pd) {
-        Document doc = new Document("_id", p.getUniqueId().toString())
-                .append("name", p.getName())
-                .append("data", gson.toJson(pd));
-        collection.insertOne(doc);
-    }
-
-    @Override
-    public void savePlayer(final Player p) {
-        final PlayerData pd = plugin.getDm().getPlayerData(p);
-        if (pd == null) return;
-        if (!plugin.getDm().markSaving(p.getUniqueId())) {
-            return;
-        }
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            try {
-                String json = gson.toJson(pd);
-                Document query = new Document("_id", p.getUniqueId().toString());
-                Document update = new Document("$set", new Document()
-                        .append("name", p.getName())
-                        .append("data", json));
-                collection.updateOne(query, update, new UpdateOptions().upsert(true));
-                if (redis.isEnabled()) {
-                    redis.setAsync(cacheKey(p), json);
-                }
-            } catch (Exception ex) {
-                plugin.getLogger().warning("Failed to save player data for " + p.getName() + ": " + ex.getMessage());
-            } finally {
-                plugin.getDm().unmarkSaving(p.getUniqueId());
+                plugin.getDm().mergePlayer(uuid, new PlayerData(uuid));
+                fireLoadEvent(p);
             }
         });
     }
 
+    private void upsertPlayerRecord(String name, UUID uuid, String json) {
+        Document query = new Document("_id", uuid.toString());
+        Document update = new Document("$set", new Document()
+                .append("name", name)
+                .append("data", json));
+        collection.updateOne(query, update, new UpdateOptions().upsert(true));
+    }
+
+    @Override
+    public void savePlayer(final Player p) {
+        final PlayerData pd = plugin.getDm().getPlayerData(p.getUniqueId());
+        if (pd == null) return;
+        pendingSaves.put(p.getUniqueId(), new PendingSave(p.getName(), pd));
+        scheduleFlush(p.getUniqueId());
+    }
+
+    private void scheduleFlush(final UUID uuid) {
+        if (!flushing.add(uuid)) return;
+        try {
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> flush(uuid));
+        } catch (IllegalPluginAccessException ex) {
+            flushing.remove(uuid);
+            flushNow(uuid);
+        }
+    }
+
+    private void flush(final UUID uuid) {
+        try {
+            PendingSave save;
+            while ((save = pendingSaves.remove(uuid)) != null) {
+                try {
+                    persist(save.name(), uuid, save.data());
+                } catch (Exception ex) {
+                    pendingSaves.putIfAbsent(uuid, save);
+                    throw ex;
+                }
+            }
+        } catch (Exception ex) {
+            plugin.getLogger().warning("Failed to save player data: " + ex.getMessage());
+        } finally {
+            flushing.remove(uuid);
+            if (pendingSaves.containsKey(uuid)) {
+                scheduleFlush(uuid);
+            }
+        }
+    }
+
+    private void flushNow(final UUID uuid) {
+        PendingSave save = pendingSaves.remove(uuid);
+        if (save == null) return;
+        try {
+            persist(save.name(), uuid, save.data());
+        } catch (Exception ex) {
+            plugin.getLogger().warning("Failed to save player data for " + save.name() + ": " + ex.getMessage());
+        }
+    }
+
+    private void persist(String name, UUID uuid, PlayerData pd) {
+        String json = gson.toJson(pd);
+        upsertPlayerRecord(name, uuid, json);
+        if (redis.isEnabled()) {
+            redis.set(cacheKey(uuid), json);
+        }
+    }
+
     @Override
     public void savePlayerSync(Player p) {
-        PlayerData pd = plugin.getDm().getPlayerData(p);
+        PlayerData pd = plugin.getDm().getPlayerData(p.getUniqueId());
         if (pd == null) return;
         try {
-            String json = gson.toJson(pd);
-            Document query = new Document("_id", p.getUniqueId().toString());
-            Document update = new Document("$set", new Document()
-                    .append("name", p.getName())
-                    .append("data", json));
-            collection.updateOne(query, update, new UpdateOptions().upsert(true));
-            if (redis.isEnabled()) {
-                redis.setAsync(cacheKey(p), json);
-            }
+            persist(p.getName(), p.getUniqueId(), pd);
+            pendingSaves.remove(p.getUniqueId());
         } catch (Exception ex) {
             plugin.getLogger().warning("Failed to save player data (sync) for " + p.getName() + ": " + ex.getMessage());
         }
@@ -172,10 +207,25 @@ public class MongoDBDatabase implements Database {
 
     @Override
     public void close() {
+        drainPendingSaves();
         if (client != null) {
             try {
                 client.close();
             } catch (Exception ignored) {
+            }
+        }
+    }
+
+    private void drainPendingSaves() {
+        for (Map.Entry<UUID, PendingSave> entry : pendingSaves.entrySet()) {
+            PendingSave save = entry.getValue();
+            if (pendingSaves.remove(entry.getKey(), save)) {
+                try {
+                    persist(save.name(), entry.getKey(), save.data());
+                } catch (Exception ex) {
+                    plugin.getLogger().warning("Failed to flush pending save during shutdown for "
+                            + save.name() + ": " + ex.getMessage());
+                }
             }
         }
     }
@@ -186,7 +236,10 @@ public class MongoDBDatabase implements Database {
     }
 
     private void fireLoadEvent(Player p) {
-        Bukkit.getScheduler().runTask(plugin, () ->
-                Bukkit.getPluginManager().callEvent(new DeliveryPlayerLoadEvent(p)));
+        try {
+            Bukkit.getScheduler().runTask(plugin, () ->
+                    Bukkit.getPluginManager().callEvent(new DeliveryPlayerLoadEvent(p)));
+        } catch (IllegalPluginAccessException ignored) {
+        }
     }
 }

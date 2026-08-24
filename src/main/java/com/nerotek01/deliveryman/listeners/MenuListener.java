@@ -102,9 +102,9 @@ public class MenuListener implements Listener {
         Reward reward = plugin.getRm().getRewards().get(id);
         if (reward == null) return;
 
-        PlayerData pd = plugin.getDm().getPlayerData(p);
+        PlayerData pd = plugin.getDm().getPlayerData(p.getUniqueId());
         if (pd == null) {
-            pd = plugin.getDm().getOrCreatePlayerData(p);
+            pd = plugin.getDm().getOrCreatePlayerData(p.getUniqueId());
         }
         handleRewardClick(p, pd, reward);
     }
@@ -187,6 +187,7 @@ public class MenuListener implements Listener {
         }
         sendMessages(p, message);
         pd.claim(reward.getId(), System.currentTimeMillis());
+        plugin.getDb().savePlayer(p);
         executeCommands(p, reward.getRewards());
         reward.getNoClaimed().playSound(p);
     }

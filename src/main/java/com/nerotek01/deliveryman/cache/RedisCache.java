@@ -94,35 +94,18 @@ public class RedisCache {
         pool = null;
     }
 
-    public void setAsync(String key, String value) {
+    public void set(String key, String value) {
         if (!isEnabled() || key == null || value == null) return;
-        final String full = prefix + key;
-        final int ttl = ttlSeconds;
-        Runnable task = () -> {
-            try (Jedis jedis = pool.getResource()) {
-                if (ttl > 0) {
-                    jedis.setex(full, ttl, value);
-                } else {
-                    jedis.set(full, value);
-                }
-            } catch (Exception ex) {
-                plugin.getLogger().warning("Redis SET failed for key " + key + ": " + ex.getMessage());
+        String full = prefix + key;
+        try (Jedis jedis = pool.getResource()) {
+            if (ttlSeconds > 0) {
+                jedis.setex(full, ttlSeconds, value);
+            } else {
+                jedis.set(full, value);
             }
-        };
-        org.bukkit.Bukkit.getScheduler().runTaskAsynchronously(plugin, task);
-    }
-
-    public void delAsync(String key) {
-        if (!isEnabled() || key == null) return;
-        final String full = prefix + key;
-        Runnable task = () -> {
-            try (Jedis jedis = pool.getResource()) {
-                jedis.del(full);
-            } catch (Exception ex) {
-                plugin.getLogger().warning("Redis DEL failed for key " + key + ": " + ex.getMessage());
-            }
-        };
-        org.bukkit.Bukkit.getScheduler().runTaskAsynchronously(plugin, task);
+        } catch (Exception ex) {
+            plugin.getLogger().warning("Redis SET failed for key " + key + ": " + ex.getMessage());
+        }
     }
 
     public String get(String key) {
@@ -134,13 +117,5 @@ public class RedisCache {
             plugin.getLogger().warning("Redis GET failed for key " + key + ": " + ex.getMessage());
             return null;
         }
-    }
-
-    public int getTtlSeconds() {
-        return ttlSeconds;
-    }
-
-    public String getPrefix() {
-        return prefix;
     }
 }

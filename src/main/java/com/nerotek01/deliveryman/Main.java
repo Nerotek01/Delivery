@@ -98,14 +98,14 @@ public class Main extends JavaPlugin {
                         getLogger().warning("Failed to save player data during shutdown: " + player.getName() + ": " + ex.getMessage());
                     }
                 }
-                if (dm != null) {
-                    dm.clearAll();
-                }
                 try {
                     db.close();
                 } catch (Exception ex) {
                     getLogger().warning("Error closing database: " + ex.getMessage());
                 }
+            }
+            if (dm != null) {
+                dm.clearAll();
             }
             if (redis != null) {
                 redis.close();

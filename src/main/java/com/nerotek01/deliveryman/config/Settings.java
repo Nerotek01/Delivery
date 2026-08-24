@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class Settings {
@@ -74,14 +73,6 @@ public class Settings {
         }
     }
 
-    public Object getObject(String path) {
-        return config.get(path);
-    }
-
-    public String getString(String path, String def) {
-        return config.getString(path, def);
-    }
-
     public String get(String path) {
         String value = config.getString(path);
         return value == null ? null : value.replace("&", "\u00a7");
@@ -100,10 +91,6 @@ public class Settings {
         return config.getInt(path);
     }
 
-    public int getInt(String path, int def) {
-        return config.getInt(path, def);
-    }
-
     public int getIntOrDefault(String path, int def) {
         if (!config.isSet(path)) {
             config.set(path, def);
@@ -111,23 +98,6 @@ public class Settings {
             return def;
         }
         return config.getInt(path);
-    }
-
-    public boolean getBoolean(String path) {
-        return config.getBoolean(path);
-    }
-
-    public boolean getBooleanOrDefault(String path, boolean def) {
-        if (!config.isSet(path)) {
-            config.set(path, def);
-            save();
-            return def;
-        }
-        return config.getBoolean(path);
-    }
-
-    public List<String> getStringList(String path) {
-        return config.getStringList(path);
     }
 
     public List<String> getList(String path) {
@@ -138,25 +108,6 @@ public class Settings {
             if (o != null) result.add(String.valueOf(o).replace("&", "\u00a7"));
         }
         return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> List<T> getListOrDefault(String path, List<T> def) {
-        if (!config.isSet(path)) {
-            config.set(path, def);
-            save();
-            return def;
-        }
-        List<?> raw = config.getList(path);
-        if (raw == null) return def;
-        List<T> result = new ArrayList<>();
-        for (Object o : raw) {
-            try {
-                result.add((T) o);
-            } catch (ClassCastException ignored) {
-            }
-        }
-        return result.isEmpty() ? def : result;
     }
 
     public List<String> getListOrDefaultStrings(String path, List<String> def) {
@@ -175,14 +126,5 @@ public class Settings {
 
     public YamlConfiguration getConfig() {
         return config;
-    }
-
-    public File getFile() {
-        return file;
-    }
-
-    public List<String> getListOrEmpty(String path) {
-        List<String> r = getList(path);
-        return r == null ? Collections.emptyList() : r;
     }
 }
