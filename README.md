@@ -170,35 +170,6 @@ public void onLoad(DeliveryPlayerLoadEvent event) {
 
 This event is fired on the main server thread and is safe to use with Bukkit APIs.
 
-## Building
-
-The project uses Gradle with the Shadow plugin to produce a self-contained, relocated fat-jar.
-
-```bash
-git clone https://github.com/Nerotek01/Delivery.git
-cd Delivery
-./gradlew clean build
-```
-
-On Windows, use `gradlew.bat` instead of `./gradlew`.
-
-The compiled artifact will be at `build/libs/Delivery-<version>.jar` (for example `build/libs/Delivery-3.3.1.jar`). The `-slim` jar in the same directory is the non-shaded intermediate output and is not intended for direct installation on a server.
-
-### Build System Details
-
-- **Build tool:** Gradle 8.10.2 (via the bundled Gradle Wrapper).
-- **JDK requirement:** Java 21 (set `JAVA_HOME` to a JDK 21 install before running `./gradlew`).
-- **Shadow plugin:** `com.gradleup.shadow` 8.3.0, applied in `build.gradle`.
-- **Dependency relocation:** All shaded third-party libraries are relocated under the `com.nerotek01.libs` package to avoid conflicts with other plugins on the same server:
-  - `com.mongodb` -> `com.nerotek01.libs.mongodb`
-  - `org.bson` -> `com.nerotek01.libs.bson`
-  - `redis.clients.jedis` -> `com.nerotek01.libs.jedis`
-  - `org.apache.commons.pool2` -> `com.nerotek01.libs.pool2`
-  - `com.google.gson` -> `com.nerotek01.libs.gson`
-  - `org.slf4j` -> `com.nerotek01.libs.slf4j`
-- **Metadata filtering:** Signature files (`META-INF/*.SF`, `*.DSA`, `*.RSA`), Maven metadata (`META-INF/maven/**`), and `module-info.class` are stripped from the final jar.
-- **Resource filtering:** The `plugin.yml` resource is processed by Gradle's `processResources` task so the `version` field is substituted from the project version defined in `gradle.properties`.
-
 ## Installation
 
 1. Download the latest release jar from the Releases page.
