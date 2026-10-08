@@ -1,3 +1,5 @@
+> **Note:** This project was originally developed as a **private** plugin by **Nerotek01**. After careful consideration, the creator decided to make it **public** and release it to the community.
+
 # Delivery
 
 A high-performance Minecraft rewards plugin developed by Nerotek01. Provides a configurable Mystery Dust rewards menu backed by MongoDB with an optional Redis cache layer.
@@ -94,7 +96,7 @@ Tab completion is provided for the `reload` subcommand and is restricted to cons
 
 ### config.yml
 
-```yaml
+=== YAML START ===
 rewardsmenu:
   enabled: true
   rows: 6
@@ -117,7 +119,7 @@ redis:
   timeout: 5000
   prefix: "delivery:"
   ttl: 3600
-```
+=== YAML END ===
 
 ### rewards.yml
 
@@ -161,12 +163,12 @@ All strings support the `&` color code prefix.
 
 The plugin fires a custom event whenever a player's data finishes loading:
 
-```java
+=== JAVA START ===
 @EventHandler
 public void onLoad(DeliveryPlayerLoadEvent event) {
     Player player = event.getPlayer();
 }
-```
+=== JAVA END ===
 
 This event is fired on the main server thread and is safe to use with Bukkit APIs.
 
